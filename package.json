@@ -1,0 +1,24 @@
+{
+  "name": "SasaLauncher2",
+  "version": "1.0.0",
+  "main": "app.js",
+  "license": "MIT",
+  "scripts": {
+    "compile":"node lib/build.js compile",
+    "start": "yarn compile && cd dist && electron ."
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "ejs-electron": "^2.1.1",
+    "electron-updater": "^4.3.9",
+    "fs-extra": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.9.1",
+    "copyfiles": "^2.4.1",
+    "electron": "^13.1.7",
+    "electron-builder": "^22.11.7",
+    "replace-in-file": "^6.2.0",
+    "typescript": "^4.4.3"
+  }
+}
