@@ -8,7 +8,10 @@
   "scripts": {
     "compile": "node lib/build.js compile",
     "start": "yarn compile && cd dist && electron .",
-    "build": "node lib/build.js"
+    "build": "node lib/build.js",
+    "build:win": "yarn build WINDOWS",
+    "build:mac": "yarn build MAC",
+    "build:linux": "yarn build LINUX"
   },
   "dependencies": {
     "axios": "^0.21.4",
