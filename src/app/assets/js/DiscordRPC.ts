@@ -10,6 +10,12 @@ class DiscordRPC{
 
   public static async setActivity(option:Presence):Promise<void>{
     option.startTimestamp = this.startTime
+    option.buttons = [
+      {
+        label: "SasaLauncher2",
+        url: "https://github.com/sasadd-LAB/SasaLauncher2"
+      }
+    ]
     await this.client.setActivity(option)
   }
   public static async setDefault(){
@@ -18,7 +24,13 @@ class DiscordRPC{
       state: 'SasaLauncher2 v1.0.0',
       startTimestamp:this.startTime,
       largeImageKey: 'icon',
-      largeImageText: 'SasaLauncher2'
+      largeImageText: 'SasaLauncher2',
+      buttons: [
+        {
+          label: "SasaLauncher2",
+          url: "https://github.com/sasadd-LAB/SasaLauncher2"
+        }
+      ]
     })
   }
 }

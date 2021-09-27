@@ -41,7 +41,7 @@ class Launcher{
             const accounts:Account[] = await ipcRenderer.invoke('getAccounts')
             const account = accounts.filter(v=>v.uuid === uuid)[0]
             if(typeof account === 'undefined')
-                reject(new LauncherError('AccountNotFoundException','A:001','アカウントが見つかりません。'))
+                reject(new LauncherError('AccountNotFoundException','A:011','アカウントが見つかりません。'))
             
             const distro: Distribution = await ipcRenderer.invoke('getDistribution')
             const option: ServerOption = distro.servers.filter(v=>v.id === id)[0]

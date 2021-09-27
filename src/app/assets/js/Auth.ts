@@ -108,7 +108,7 @@ class Auth{
             })
             .catch(error => {
                 const Aerorr = <AuthenticationError>error
-                reject(new LauncherError(Aerorr.name,'A:003',Aerorr.message))
+                reject(new LauncherError(Aerorr.name,'A:001',Aerorr.message))
             })
         })
     }
@@ -137,7 +137,7 @@ class Auth{
             })
             .catch(error=>{
                 const Aerorr = <AuthenticationError>error
-                reject(new LauncherError(Aerorr.name, 'A:004', Aerorr.message))
+                reject(new LauncherError(Aerorr.name, 'A:002', Aerorr.message))
             })
             
         })

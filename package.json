@@ -1,6 +1,6 @@
 {
   "name": "SasaLauncher2",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "app.js",
   "author": "ddPn08",
   "description": "笹だサーバーに入るためのマインクラフトランチャー。",
