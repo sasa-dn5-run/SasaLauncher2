@@ -5,6 +5,6 @@ product
 *.log
 *.code-workspace
 
-.env
+retag
 
 isDev.js
