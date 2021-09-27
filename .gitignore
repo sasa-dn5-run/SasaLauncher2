@@ -3,3 +3,8 @@ dist
 product
 
 *.log
+*.code-workspace
+
+.env
+
+isDev.js

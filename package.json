@@ -2,23 +2,39 @@
   "name": "SasaLauncher2",
   "version": "1.0.0",
   "main": "app.js",
+  "author": "ddPn08",
+  "description": "笹だサーバーに入るためのマインクラフトランチャー。",
   "license": "MIT",
   "scripts": {
-    "compile":"node lib/build.js compile",
-    "start": "yarn compile && cd dist && electron ."
+    "compile": "node lib/build.js compile",
+    "start": "yarn compile && cd dist && electron .",
+    "build": "node lib/build.js"
   },
   "dependencies": {
+    "axios": "^0.21.4",
+    "crypto": "^1.0.1",
+    "discord-rpc": "^4.0.1",
     "dotenv": "^10.0.0",
     "ejs-electron": "^2.1.1",
+    "electron-log": "^4.4.1",
     "electron-updater": "^4.3.9",
-    "fs-extra": "^10.0.0"
+    "fs-extra": "^10.0.0",
+    "minecraft-auth": "^1.0.29",
+    "minecraft-launcher-core": "^3.16.8"
   },
   "devDependencies": {
+    "@types/discord-rpc": "^4.0.0",
     "@types/node": "^16.9.1",
     "copyfiles": "^2.4.1",
     "electron": "^13.1.7",
     "electron-builder": "^22.11.7",
+    "node-glob": "^1.2.0",
     "replace-in-file": "^6.2.0",
+    "sass": "^1.42.1",
     "typescript": "^4.4.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sasadd-LAB/SasaLauncher2.git"
   }
 }

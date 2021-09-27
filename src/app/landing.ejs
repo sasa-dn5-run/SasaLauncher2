@@ -1,3 +1,143 @@
-<div>
-    <h1>hello world</h1>
+<div id="header">
+    <div class="body def_text none_select">
+        <div right>
+            <h1 class="title">SasaLauncher2</h1>
+        </div>
+        <div left>
+            <div updateInfo>
+                <p class="info" id="UpdateNoticeParagraph" style="opacity: 0;">アップデートがあります→</p>
+                <p class="material-icons updateButton" onclick="checkUpdate()">system_update_alt</p>
+            </div>
+            <div class="account">
+                <div wrapper>
+                    <p class="username"></p>
+                    <img class="usericon" src="" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="lineJoint" style="width: 100%;">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="isolation:isolate"
+            viewBox="0 0 1280 100">
+            <defs>
+                <clipPath id="_clipPath_iIdn3kLdi9lE4yA6pTVL3BJvjs438nhI">
+                    <rect width="1280" height="100" />
+                </clipPath>
+            </defs>
+            <g clip-path="url(#_clipPath_iIdn3kLdi9lE4yA6pTVL3BJvjs438nhI)">
+                <rect x="0" y="0" width="1280" height="106" transform="matrix(1,0,0,1,0,0)" fill="rgb(76,123,87)" />
+                <path d=" M 0 64 Q 388 5 672 37 Q 956 69 1280 30 L 1280 100 L 0 100 L 0 64 Z " fill="rgb(193,193,193)"
+                    fill-opacity="0.5" />
+                <path
+                    d=" M 0 50.661 Q 338.97 85.206 671 56.195 Q 1003.03 27.183 1280 66.156 L 1280 106 L 0 106 L 0 50.661 Z "
+                    fill="rgb(255,255,255)" />
+            </g>
+        </svg>
+    </div>
+</div>
+<div id="main">
+    <div id="setting" class="child def_text none_select">
+        <h1>設定</h1>
+        <div class="inputSpace">
+            <div class="input">
+                <p>データフォルダ</p>
+                <input type="text" class="dataFolder" placeholder="">
+            </div>
+            <div class="input">
+                <p>Java16のパス</p>
+                <input type="text" class="java16" placeholder="C:\Program Files\Eclipse Foundation\jdk-16.0.2.7-hotspot\bin\java.exe">
+            </div>
+            <div class="input">
+                <p>Java8のパス</p>
+                <input type="text" class="java8" placeholder="C:\Program Files\Eclipse Foundation\jdk-8.0.302.8-hotspot\bin\java.exe">
+            </div>
+            <div class="input">
+                <p>最大メモリ割り当て</p>
+                <div class="rangeInput">
+                    <input type="number" class="XmxNumber" step="0.5" max="16" min="1">
+                    <input type="range" class="slideBar XmxRange" step="0.5" max="16" min="1">
+                </div>
+            </div>
+            <div class="input">
+                <p>最小メモリ割り当て</p>
+                <div class="rangeInput">
+                    <input type="number" class="XmsNumber" step="0.5" max="16" min="1">
+                    <input type="range" class="slideBar XmsRange" step="0.5" max="16" min="1">
+                </div>
+            </div>
+            <div class="button green">
+                <p onclick="saveConfiguration()">保存</p>
+            </div>
+        </div>
+    </div>
+    <div id="login" class="child def_text none_select">
+        <div class="inputSpace">
+            <h1>ログイン</h1>
+            <h2>Mojangアカウント</h2>
+            <div class="input">
+                <p>メールアドレス</p>
+                <input type="email" class="email" placeholder="email">
+            </div>
+            <div class="input">
+                <p>パスワード</p>
+                <input type="password" class="password" placeholder="password">
+            </div>
+            <div class="button green">
+                <p onclick="addMojangAccount()">ログイン</p>
+            </div>
+            <h2>Microsoftアカウント</h2>
+            <div class="button green">
+                <p onclick="ipcRenderer.send('MicrosoftOAuth')">Microsoftログイン</p>
+            </div>
+        </div>
+    </div>
+    <div id="launch" class="child def_text none_select">
+        <h1>起動</h1>
+        <div class="servers">
+            <!-- <div class="server">
+                <div class="wrapper">
+                    <div class="info">
+                        <h1 class="title">サンプル</h1>
+                        <p class="description">サンプルの構成です。</p>
+                    </div>
+                    <p class="material-icons launchButton" onclick="launchMinecraft('${v.id}')">play_arrow</p>
+                    <div class="mods">
+                        <div class="mod">
+                            <h2>optifabric-1.11.20.jar</h2>
+                            <div style="text-align: center;" class="toggle_switch">
+                                <input type="checkbox" class="" id="sample_optifabric-1.11.20.jar" style="display: none;">
+                                <label class="check" for="sample_optifabric-1.11.20.jar"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    <div id="account" class="child def_text none_select">
+        <h1>アカウント</h1>
+        <div class="accounts">
+            <!-- <<div class="account">
+                <div class="info">
+                    <img src="https://crafatar.com/avatars/sample?size=100" alt="">
+                    <div>
+                        <p>username</p>
+                        <h1>sample</h1>
+                        <p>uuid</p>
+                        <h2>sample</h2>
+                    </div>
+                </div>
+                <div class="control">
+                    <div class="button white" onclick="selectUser('sample')">
+                        <p>選択</p>
+                    </div>
+                    <div class="button white" onclick="logoutUser('sample')">
+                        <p>ログアウト</p>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    <p class="material-icons" id="mainBack" onclick="toggleMain('back')">navigate_before</p>
+    <p class="material-icons" id="mainNext" onclick="toggleMain('next')">navigate_next</p>
 </div>

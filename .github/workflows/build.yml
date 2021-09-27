@@ -1,0 +1,140 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      ##Tag Number input
+      - name: Get latest release version tag number
+        id: get_version
+        uses: battila7/get-version-action@v2
+
+      ##ReleaseChannel - go!
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: SasaLauncher2 - ${{ steps.get_version.outputs.version }}
+          body: |
+            ### Download
+            [Windows](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.exe)
+            [Mac OS X](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.dmg)
+            [Linux](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.AppImage)
+          draft: false
+          prerelease: false
+
+
+  build:
+    runs-on: ${{ matrix.os }}
+
+    needs:
+      - release
+
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    steps:
+      - name: Context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16'
+
+      ##Tag Number input
+      - name: Get latest release version tag number
+        id: get_version
+        uses: battila7/get-version-action@v2
+
+      ##CreateAPP - yarn release
+      - name: Install yarn
+        run: npm install -g yarn
+
+      - name: YARN install
+        run: yarn install
+
+      - name: Update package.json
+        run: node update ${{ steps.get_version.outputs.version-without-v }}
+
+        #build
+
+      - name: YARN Build MacOS
+        if: matrix.os == 'macos-latest'
+        run: yarn build:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: YARN Build Windows
+        if: matrix.os == 'windows-latest'
+        run: yarn build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: YARN Build Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: yarn build:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      ##ActionRelease - zip
+      - uses: actions/upload-artifact@v1
+        name: Action-Upload-MacOS1
+        if: matrix.os == 'macos-latest'
+        with:
+          name: MacOS Release
+          path: product
+
+      - uses: actions/upload-artifact@v1
+        name: Action-Upload-Windows1
+        if: matrix.os == 'windows-latest'
+        with:
+          name: Windows Release
+          path: product
+
+      - uses: actions/upload-artifact@v1
+        name: Action-Upload-Ubuntu1
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          name: Linux Release
+          path: product
+
+      - uses: AButler/upload-release-assets@v2.0
+        name: Upload Release File - MacOS1
+        if: matrix.os == 'macos-latest'
+        with:
+          files: product/latest-mac.yml;product/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.{dmg,dmg.blockmap}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ steps.get_version.outputs.version }}
+
+      - uses: AButler/upload-release-assets@v2.0
+        name: Upload Release File - Windows1
+        if: matrix.os == 'windows-latest'
+        with:
+          files: product/latest.yml;product/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.{exe,exe.blockmap}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ steps.get_version.outputs.version }}
+
+      - uses: AButler/upload-release-assets@v2.0
+        name: Upload Release File - Ubuntu1
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          files: product/latest-linux.yml;product/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.AppImage
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ steps.get_version.outputs.version }}
