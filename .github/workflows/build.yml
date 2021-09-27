@@ -26,9 +26,9 @@ jobs:
           release_name: SasaLauncher2 - ${{ steps.get_version.outputs.version }}
           body: |
             ### Download
-            [Windows](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.exe)
-            [Mac OS X](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.dmg)
-            [Linux](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.AppImage)
+            [Windows](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/SasaLauncher2-setup-${{ steps.get_version.outputs.version-without-v }}.exe)
+            [Mac OS X](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/SasaLauncher2-setup-${{ steps.get_version.outputs.version-without-v }}.dmg)
+            [Linux](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/SasaLauncher2-setup-${{ steps.get_version.outputs.version-without-v }}.AppImage)
           draft: false
           prerelease: false
 
@@ -119,7 +119,7 @@ jobs:
         name: Upload Release File - MacOS1
         if: matrix.os == 'macos-latest'
         with:
-          files: product/latest-mac.yml;product/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.{dmg,dmg.blockmap}
+          files: product/latest-mac.yml;product/SasaLauncher2-setup-${{ steps.get_version.outputs.version-without-v }}.{dmg,dmg.blockmap}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ steps.get_version.outputs.version }}
 
@@ -127,7 +127,7 @@ jobs:
         name: Upload Release File - Windows1
         if: matrix.os == 'windows-latest'
         with:
-          files: product/latest.yml;product/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.{exe,exe.blockmap}
+          files: product/latest.yml;product/SasaLauncher2-setup-${{ steps.get_version.outputs.version-without-v }}.{exe,exe.blockmap}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ steps.get_version.outputs.version }}
 
@@ -135,6 +135,6 @@ jobs:
         name: Upload Release File - Ubuntu1
         if: matrix.os == 'ubuntu-latest'
         with:
-          files: product/latest-linux.yml;product/SasaLauncher2-setup-${{ steps.get_version.outputs.version }}.AppImage
+          files: product/latest-linux.yml;product/SasaLauncher2-setup-${{ steps.get_version.outputs.version-without-v }}.AppImage
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ steps.get_version.outputs.version }}
