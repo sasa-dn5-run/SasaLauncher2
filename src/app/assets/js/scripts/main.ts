@@ -1,7 +1,7 @@
 import { Auth }              from "@assets/js/Auth";
 import { Launcher, LauncherError } from "@assets/js/Launcher";
 import { Account } from "@assets/js/model/account";
-import { Distribution } from "@assets/js/model/Distribution";
+import { Distribution, ServerOption } from "@assets/js/model/Distribution";
 import { Configuration } from "@assets/js/model/configuration";
 import { ConfigurationManager } from "@assets/js/ConfigurationManager";
 import { Logger } from "@assets/js/Logger";
@@ -90,22 +90,41 @@ async function initDom() {
 
 async function updateServers() {
     const distribution = await ipcRenderer.invoke('getDistribution')
-    const configs = distribution.servers
+    const configs:ServerOption[] = distribution.servers
     const servers: HTMLDivElement = <HTMLDivElement>launch.getElementsByClassName('servers')[0]
+    const config = ConfigurationManager.getConfig()
     servers.innerHTML = ''
     for (const v of configs) {
         const server = document.createElement('div')
         let modsHTML = '<p style="color:#325239; margin:0; margin-left:5px;">MOD</p>'
         for (const m of v.mods) {
+            const modpath = path.join(config.MinecraftDataFolder, 'servers', server.id, 'mods', `${v.name}.disabled`)
             const html =
                 `<div class="mod">
                 <h2>${m.name}</h2>
                 <div style="text-align: center;" class="toggle_switch">
-                    <input type="checkbox" name="${m.name}" id="${v.id}_${m.name}" style="display: none;">
+                    <input type="checkbox" name="${m.name}" id="${v.id}_${m.name}" checked=${checkEnableMod(modpath)} style="display: none;">
                     <label class="check" for="${v.id}_${m.name}"></label>
                 </div>
             </div>`
             modsHTML += html
+        }
+        let additional_mods = '<p style="color:#325239; margin:0; margin-left:5px;">Additional Mods</p>'
+        if (fs.existsSync(path.join(config.MinecraftDataFolder, 'servers', v.id, 'mods'))){
+            for (const m of fs.readdirSync(path.join(config.MinecraftDataFolder, 'servers', v.id, 'mods'))) {
+                if (v.mods.filter(v2=>v2.name === m).length !== 0)
+                    continue
+                const modpath = path.join(config.MinecraftDataFolder, 'servers', server.id, 'mods', `${v.name}.disabled`)
+                const html =
+                    `<div class="mod">
+                    <h2>${m}</h2>
+                    <div style="text-align: center;" class="toggle_switch">
+                        <input type="checkbox" name="${m}" id="${v.id}_${m}" checked=${checkEnableMod(modpath)} style="display: none;">
+                        <label class="check" for="${v.id}_${m}"></label>
+                    </div>
+                </div>`
+                additional_mods += html
+            }
         }
         server.innerHTML =
             `<div class="wrapper">
@@ -118,8 +137,8 @@ async function updateServers() {
                 <div class="mods">
                     ${modsHTML}
                 </div>
-                <div id="additional_mods">
-
+                <div class="mods">
+                    ${additional_mods}
                 </div>
             </div>`
         server.classList.add('server')
@@ -127,6 +146,17 @@ async function updateServers() {
     }
 }
 
+function checkEnableMod(modpath:string){
+    if (typeof modpath === 'undefined') {
+        return true
+    }
+    const disabled = fs.existsSync(modpath)
+    if (disabled) {
+        return false
+    } else {
+        return true
+    }
+}
 
 async function updateAccounts() {
     const accountsData = await ipcRenderer.invoke('getAccounts')
@@ -225,10 +255,6 @@ async function toggleMain(direction: string) {
 }
 
 
-
-
-
-
 /**
  * main
  */
@@ -251,7 +277,17 @@ async function init(){
     await ConfigurationManager.init()
     const config = ConfigurationManager.getConfig()
 
-
+    //process
+    process.on('uncaughtException', (error) => {
+        console.log(error.name)
+        overlay.Error('U:000', error.message)
+    })
+    process.on('unhandledRejection',(reason)=>{
+        console.log(reason)
+    })
+    process.on('uncaughtExceptionMonitor',(error,origin)=>{
+        console.log(error,origin)
+    })
 
     const dataFolder: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('dataFolder')[0]
     const java16: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('java16')[0]
@@ -445,8 +481,10 @@ async function logoutUser(uuid:string){
  * @param id 起動構成のID
  */
 async function launchMinecraft(id:string){
-    const modsDiv:HTMLDivElement = <HTMLDivElement>launch.getElementsByClassName('mods')[0]
+    const modsDiv: HTMLDivElement = <HTMLDivElement>launch.getElementsByClassName('mods')[0]
+    const additional_modsDiv: HTMLDivElement = <HTMLDivElement>launch.getElementsByClassName('mods')[1]
     const mods = modsDiv.getElementsByTagName('input')
+    const additional_mods = additional_modsDiv.getElementsByTagName('input')
     const disableModList = []
     
     for(const v of mods){
@@ -454,6 +492,13 @@ async function launchMinecraft(id:string){
             disableModList.push(v.name)
         }
     }
+    for (const v of additional_mods) {
+        if (!v.checked) {
+            disableModList.push(v.name)
+        }
+    }
+
+    console.log(disableModList)
     
     await overlay.showProgress()
     try {
