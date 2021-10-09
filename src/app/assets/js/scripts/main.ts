@@ -2,7 +2,6 @@ import { Auth }              from "@assets/js/Auth";
 import { Launcher, LauncherError } from "@assets/js/Launcher";
 import { Account } from "@assets/js/model/account";
 import { Distribution, ServerOption } from "@assets/js/model/Distribution";
-import { Configuration } from "@assets/js/model/configuration";
 import { ConfigurationManager } from "@assets/js/ConfigurationManager";
 import { Logger } from "@assets/js/Logger";
 import { DiscordRPC } from "@assets/js/DiscordRPC";
@@ -10,8 +9,6 @@ import { DiscordRPC } from "@assets/js/DiscordRPC";
 import fs                    from "fs-extra"
 import path                  from "path"
 import axios                 from "axios"
-import { session } from "electron";
-import { Client } from "discord-rpc";
 import { IpcRendererEvent } from "electron/main";
 
 
@@ -98,12 +95,11 @@ async function updateServers() {
         const server = document.createElement('div')
         let modsHTML = '<p style="color:#325239; margin:0; margin-left:5px;">MOD</p>'
         for (const m of v.mods) {
-            const modpath = path.join(config.MinecraftDataFolder, 'servers', server.id, 'mods', `${v.name}.disabled`)
             const html =
                 `<div class="mod">
                 <h2>${m.name}</h2>
                 <div style="text-align: center;" class="toggle_switch">
-                    <input type="checkbox" name="${m.name}" id="${v.id}_${m.name}" checked=${checkEnableMod(modpath)} style="display: none;">
+                    <input type="checkbox" name="${m.name}" id="${v.id}_${m.name}" style="display: none;">
                     <label class="check" for="${v.id}_${m.name}"></label>
                 </div>
             </div>`
@@ -112,15 +108,15 @@ async function updateServers() {
         let additional_mods = '<p style="color:#325239; margin:0; margin-left:5px;">Additional Mods</p>'
         if (fs.existsSync(path.join(config.MinecraftDataFolder, 'servers', v.id, 'mods'))){
             for (const m of fs.readdirSync(path.join(config.MinecraftDataFolder, 'servers', v.id, 'mods'))) {
-                if (v.mods.filter(v2=>v2.name === m).length !== 0)
+                const name = m.replace('.disabled','')
+                if (v.mods.filter(v2 => v2.name === name).length !== 0)
                     continue
-                const modpath = path.join(config.MinecraftDataFolder, 'servers', server.id, 'mods', `${v.name}.disabled`)
                 const html =
                     `<div class="mod">
-                    <h2>${m}</h2>
+                    <h2>${name}</h2>
                     <div style="text-align: center;" class="toggle_switch">
-                        <input type="checkbox" name="${m}" id="${v.id}_${m}" checked=${checkEnableMod(modpath)} style="display: none;">
-                        <label class="check" for="${v.id}_${m}"></label>
+                        <input type="checkbox" name="${name}" id="${v.id}_${name}" style="display: none;">
+                        <label class="check" for="${v.id}_${name}"></label>
                     </div>
                 </div>`
                 additional_mods += html
@@ -146,18 +142,6 @@ async function updateServers() {
     }
 }
 
-function checkEnableMod(modpath:string){
-    if (typeof modpath === 'undefined') {
-        return true
-    }
-    const disabled = fs.existsSync(modpath)
-    if (disabled) {
-        return false
-    } else {
-        return true
-    }
-}
-
 async function updateAccounts() {
     const accountsData = await ipcRenderer.invoke('getAccounts')
 
@@ -168,7 +152,7 @@ async function updateAccounts() {
         const acco = document.createElement('div')
         acco.innerHTML =
             `<div class="info">
-                <img src="https://crafatar.com/avatars/${v.uuid}?size=100" alt="">
+                <img src="https://mcskin.sasadd.net/uuid/face/${v.uuid}?size=100" alt="">
                 <div>
                     <p>username</p>
                     <h1>${v.username}</h1>
@@ -189,7 +173,7 @@ async function updateAccounts() {
             const usericon: HTMLImageElement = <HTMLImageElement>accountEl.getElementsByClassName('usericon')[0]
 
             username.innerHTML = v.username
-            usericon.src = `https://crafatar.com/avatars/${v.uuid}?size=50`
+            usericon.src = `https://mcskin.sasadd.net/uuid/face/${v.uuid}?size=50`
 
             currentAccount = v.uuid
         }
@@ -328,14 +312,12 @@ async function init(){
     //mods
     const distribution:Distribution = await ipcRenderer.invoke('getDistribution')
     for (const server of distribution.servers){
-        for(const mod of server.mods){
-            const doc:HTMLInputElement = <HTMLInputElement>document.getElementById(`${server.id}_${mod.name}`)
-            const modpath = path.join(config.MinecraftDataFolder, 'servers', server.id, 'mods', `${mod.name}.disabled`)
-            if(typeof modpath === 'undefined'){
-                doc.checked = true
-                continue
-            }
-            const disabled = fs.existsSync(modpath)
+        const modpath = path.join(config.MinecraftDataFolder, 'servers', server.id, 'mods')
+        if (!fs.existsSync(modpath)) fs.mkdirsSync(modpath)
+        for (const mod of fs.readdirSync(modpath)) {
+            const name = mod.replace('.disabled','')
+            const doc: HTMLInputElement = <HTMLInputElement>document.getElementById(`${server.id}_${name}`)
+            const disabled = fs.existsSync(path.join(modpath, `${name}.disabled`))
             if(disabled){
                 doc.checked = false
             } else {
@@ -447,7 +429,7 @@ async function selectUser(uuid:string){
     const usericon:HTMLImageElement = <HTMLImageElement>accountEl.getElementsByClassName('usericon')[0]
 
     username.innerHTML = account.username
-    usericon.src = `https://crafatar.com/avatars/${account.uuid}?size=50`
+    usericon.src = `https://mcskin.sasadd.net/uuid/face/${account.uuid}?size=100`
 
     const others = accounts.filter(v=>v.uuid !== uuid)
     for(const v of others){
