@@ -39,7 +39,8 @@ class Java{
 
         if (!must16 && !isEmpty(config.java8) && fs.existsSync(config.java8)) {
             const v = Java.getVersion(config.java8)
-            if (!v.startsWith('8')) {
+            console.log(v)
+            if (!v.startsWith('1.8')) {
                 throw new JavaError('WrongJavaPathException', 'J:002', '指定されたJava8のパスが間違っています。')
             }
 
