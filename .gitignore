@@ -6,3 +6,4 @@ product
 *.code-workspace
 
 dev/
+src/config.json
