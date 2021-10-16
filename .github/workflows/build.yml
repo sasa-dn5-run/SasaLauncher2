@@ -73,6 +73,7 @@ jobs:
       ##build
 
       - name: Decryption of GPG files
+        shell: bash
         run: scripts/DecryptionGpg.sh
         env:
           GPGPASS: ${{ secrets.GPGPASS }}
