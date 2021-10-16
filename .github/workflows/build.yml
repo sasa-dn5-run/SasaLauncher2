@@ -70,28 +70,34 @@ jobs:
       - name: YARN install
         run: yarn install
 
-      - name: Update package.json
-        run: node update ${{ steps.get_version.outputs.version-without-v }}
-
-        #build
+      ##build
 
       - name: YARN Build MacOS
         if: matrix.os == 'macos-latest'
         run: yarn build:mac
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AZURE_APPID: ${{ secrets.APPID }}
+          AZURE_APPSECRET: ${{ secrets.APPSECRET }}
+          AZURE_REDIRECTURL: ${{ secrets.REDIRECTURL }}
+          VERSION: ${{ steps.get_version.outputs.version-without-v }}
 
       - name: YARN Build Windows
         if: matrix.os == 'windows-latest'
         run: yarn build:win
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AZURE_APPID: ${{ secrets.APPID }}
+          AZURE_APPSECRET: ${{ secrets.APPSECRET }}
+          AZURE_REDIRECTURL: ${{ secrets.REDIRECTURL }}
+          VERSION: ${{ steps.get_version.outputs.version-without-v }}
 
       - name: YARN Build Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: yarn build:linux
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AZURE_APPID: ${{ secrets.APPID }}
+          AZURE_APPSECRET: ${{ secrets.APPSECRET }}
+          AZURE_REDIRECTURL: ${{ secrets.REDIRECTURL }}
+          VERSION: ${{ steps.get_version.outputs.version-without-v }}
 
       ##ActionRelease - zip
       - uses: actions/upload-artifact@v1
