@@ -12,7 +12,7 @@ import { MicrosoftAuth } from 'minecraft-auth'
 import {} from 'minecraft-launcher-core'
 
 const appPath = path.join(__dirname, 'app')
-const isDev = fs.existsSync('../isDev.js')
+const isDev = fs.existsSync('../dev/isDev.js')
 
 const config = require('./config.json') 
 
@@ -52,8 +52,8 @@ class MainApp {
         this.app.on('activate', this.onActivated.bind(this))
 
         this.ipcMain.on('autoUpdateAction', (event, arg, data) => {
-            // if (isDev)
-            //     return
+            if (isDev)
+                return
             switch (arg) {
                 case 'initAutoUpdater': {
                     console.log('initializing auto updater')
@@ -142,8 +142,8 @@ class MainApp {
     }
 
     private initUpdater(event: IpcMainInvokeEvent, data: any) {
-        // if (isDev)
-        //     return
+        if (isDev)
+            return
         if (process.platform === 'darwin') {
             this.autoUpdater.autoDownload = false
         }

@@ -5,7 +5,4 @@ product
 *.log
 *.code-workspace
 
-scripts
-
-isDev.js
-.env
+dev/

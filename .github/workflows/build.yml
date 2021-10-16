@@ -72,14 +72,14 @@ jobs:
 
       ##build
 
+      - name: Decryption of GPG files
+        run: scripts/DecryptionGpg.sh ${{ secrets.GPGPASS }}
+
       - name: YARN Build MacOS
         if: matrix.os == 'macos-latest'
         run: yarn build:mac
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AZURE_APPID: ${{ secrets.APPID }}
-          AZURE_APPSECRET: ${{ secrets.APPSECRET }}
-          AZURE_REDIRECTURL: ${{ secrets.REDIRECTURL }}
           VERSION: ${{ steps.get_version.outputs.version-without-v }}
 
       - name: YARN Build Windows
@@ -87,9 +87,6 @@ jobs:
         run: yarn build:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AZURE_APPID: ${{ secrets.APPID }}
-          AZURE_APPSECRET: ${{ secrets.APPSECRET }}
-          AZURE_REDIRECTURL: ${{ secrets.REDIRECTURL }}
           VERSION: ${{ steps.get_version.outputs.version-without-v }}
 
       - name: YARN Build Ubuntu
@@ -97,9 +94,6 @@ jobs:
         run: yarn build:linux
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AZURE_APPID: ${{ secrets.APPID }}
-          AZURE_APPSECRET: ${{ secrets.APPSECRET }}
-          AZURE_REDIRECTURL: ${{ secrets.REDIRECTURL }}
           VERSION: ${{ steps.get_version.outputs.version-without-v }}
 
       ##ActionRelease - zip
