@@ -1,3 +1,3 @@
 #!/bin/bash
 
-gpg --quiet --batch --yes --decrypt --passphrase=$1 --output src/config.json secret.json.gpg
+gpg --quiet --batch --yes --decrypt --passphrase=$GPGPASS --output src/config.json secret.json.gpg
