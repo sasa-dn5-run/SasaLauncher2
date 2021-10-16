@@ -73,7 +73,9 @@ jobs:
       ##build
 
       - name: Decryption of GPG files
-        run: scripts/DecryptionGpg.sh ${{ secrets.GPGPASS }}
+        run: scripts/DecryptionGpg.sh
+        env:
+          GPGPASS: ${{ secrets.GPGPASS }}
 
       - name: YARN Build MacOS
         if: matrix.os == 'macos-latest'
