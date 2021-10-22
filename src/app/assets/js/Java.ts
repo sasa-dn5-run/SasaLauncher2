@@ -24,7 +24,7 @@ class Java{
 
         let java:string | null = null
 
-        const must16: boolean = !!version.match(/1.17|1.18|21w3/)
+        const must16: boolean = !!version.match(/1.17|1.18|21w3|21w4/)
         let has16: boolean = false
 
 
