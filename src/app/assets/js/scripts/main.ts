@@ -303,7 +303,7 @@ async function init() {
 
 
     const response = await axios.get(`${packUrl}/distribution.json`)
-    // fs.writeJSONSync(path.join(DATA_PATH, "distribution.json"), response.data, { spaces: 4 })
+    fs.writeJSONSync(path.join(DATA_PATH, "distribution.json"), response.data, { spaces: 4 })
 
     await initDom()
 
