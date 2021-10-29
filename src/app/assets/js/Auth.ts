@@ -3,8 +3,6 @@ import { AuthenticationError, MicrosoftAccount, MicrosoftAuth, MojangAccount } f
 import { IUser } from "minecraft-launcher-core"
 import { LauncherError } from "./Launcher"
 
-import { Logger }from "./Logger"
-
 interface AuthConfig {
     appId:string,
     appSecret:string,
@@ -23,7 +21,10 @@ class Auth{
         this.authConfig = await ipcRenderer.invoke('getAuthConfig')
         MicrosoftAuth.setup(this.authConfig.appId, this.authConfig.appSecret, this.authConfig.redirectURL)
     }
-
+    static async setupDev(authConfig: AuthConfig){
+        this.authConfig = authConfig
+        MicrosoftAuth.setup(this.authConfig.appId, this.authConfig.appSecret, this.authConfig.redirectURL)
+    }
 
     /**
      * Mojangアカウントの認証

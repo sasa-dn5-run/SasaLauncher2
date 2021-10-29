@@ -1,4 +1,4 @@
-import { Auth }              from "@assets/js/Auth";
+import { Auth } from "@assets/js/Auth";
 import { Launcher, LauncherError } from "@assets/js/Launcher";
 import { Account } from "@assets/js/model/account";
 import { Distribution, ServerOption } from "@assets/js/model/Distribution";
@@ -6,9 +6,9 @@ import { ConfigurationManager } from "@assets/js/ConfigurationManager";
 import { Logger } from "@assets/js/Logger";
 import { DiscordRPC } from "@assets/js/DiscordRPC";
 
-import fs                    from "fs-extra"
-import path                  from "path"
-import axios                 from "axios"
+import fs from "fs-extra"
+import path from "path"
+import axios from "axios"
 import { IpcRendererEvent } from "electron/main";
 
 
@@ -16,19 +16,19 @@ import { IpcRendererEvent } from "electron/main";
  * doms
  */
 
-const header: HTMLDivElement = <HTMLDivElement>document.getElementById('header')
-const main: HTMLDivElement = <HTMLDivElement>document.getElementById('main')
-const login: HTMLDivElement = <HTMLDivElement>document.getElementById('login')
-const launch: HTMLDivElement = <HTMLDivElement>document.getElementById('launch')
-const account: HTMLDivElement = <HTMLDivElement>document.getElementById('account')
-const setting: HTMLDivElement = <HTMLDivElement>document.getElementById('setting')
+const header: HTMLDivElement = document.getElementById('header') as HTMLDivElement
+const main: HTMLDivElement = document.getElementById('main') as HTMLDivElement
+const login: HTMLDivElement = document.getElementById('login') as HTMLDivElement
+const launch: HTMLDivElement = document.getElementById('launch') as HTMLDivElement
+const account: HTMLDivElement = document.getElementById('account') as HTMLDivElement
+const setting: HTMLDivElement = document.getElementById('setting') as HTMLDivElement
 
 const mainChildren: Element[] = Array.from(main.getElementsByClassName('current'))
 let currentChild: number = 0
 
 let toggleMain_lock: boolean = false
 
-const overlay = new Overlay(<HTMLDivElement>document.getElementById("overlay"), <HTMLDivElement>document.getElementById("app"))
+const overlay = new Overlay(document.getElementById("overlay") as HTMLDivElement, document.getElementById("app") as HTMLDivElement)
 
 async function initDom() {
     const accountsData: Array<any> = await ipcRenderer.invoke('getAccounts')
@@ -42,13 +42,13 @@ async function initDom() {
     }
     const others = Array.from(main.getElementsByClassName('child')).filter(v => v.id !== landing)
     for (let v of others) {
-        (<HTMLDivElement>v).style.left = '150%'
+        (v as HTMLDivElement).style.left = '150%'
     }
 
-    const XmxNumber: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('XmxNumber')[0]
-    const XmsNumber: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('XmsNumber')[0]
-    const XmxRange: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('XmxRange')[0]
-    const XmsRange: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('XmsRange')[0]
+    const XmxNumber: HTMLInputElement = setting.getElementsByClassName('XmxNumber')[0] as HTMLInputElement
+    const XmsNumber: HTMLInputElement = setting.getElementsByClassName('XmsNumber')[0] as HTMLInputElement
+    const XmxRange: HTMLInputElement = setting.getElementsByClassName('XmxRange')[0] as HTMLInputElement
+    const XmsRange: HTMLInputElement = setting.getElementsByClassName('XmsRange')[0] as HTMLInputElement
 
     XmxNumber.addEventListener('input', () => {
         XmxRange.value = XmxNumber.value
@@ -87,8 +87,8 @@ async function initDom() {
 
 async function updateServers() {
     const distribution = await ipcRenderer.invoke('getDistribution')
-    const configs:ServerOption[] = distribution.servers
-    const servers: HTMLDivElement = <HTMLDivElement>launch.getElementsByClassName('servers')[0]
+    const configs: ServerOption[] = distribution.servers
+    const servers: HTMLDivElement = launch.getElementsByClassName('servers')[0] as HTMLDivElement
     const config = ConfigurationManager.getConfig()
     servers.innerHTML = ''
     for (const v of configs) {
@@ -106,9 +106,9 @@ async function updateServers() {
             modsHTML += html
         }
         let additional_mods = '<p style="color:#325239; margin:0; margin-left:5px;">Additional Mods</p>'
-        if (fs.existsSync(path.join(config.MinecraftDataFolder, 'servers', v.id, 'mods'))){
+        if (fs.existsSync(path.join(config.MinecraftDataFolder, 'servers', v.id, 'mods'))) {
             for (const m of fs.readdirSync(path.join(config.MinecraftDataFolder, 'servers', v.id, 'mods'))) {
-                const name = m.replace('.disabled','')
+                const name = m.replace('.disabled', '')
                 if (v.mods.filter(v2 => v2.name === name).length !== 0)
                     continue
                 const html =
@@ -123,7 +123,7 @@ async function updateServers() {
             }
         }
         server.innerHTML =
-            `<div class="wrapper">
+            `<div class="wrapper ${v.id}">
                 <div class="info">
                     <h1 class="title">${v.name}</h1>
                     <p class="version">${v.option.version.number}</p>
@@ -169,8 +169,8 @@ async function updateAccounts() {
         accounts.appendChild(acco)
         if (v.selected === true) {
             const accountEl = header.getElementsByClassName('account')[0]
-            const username: HTMLParagraphElement = <HTMLParagraphElement>accountEl.getElementsByClassName('username')[0]
-            const usericon: HTMLImageElement = <HTMLImageElement>accountEl.getElementsByClassName('usericon')[0]
+            const username: HTMLParagraphElement = accountEl.getElementsByClassName('username')[0] as HTMLParagraphElement
+            const usericon: HTMLImageElement = accountEl.getElementsByClassName('usericon')[0] as HTMLImageElement
 
             username.innerHTML = v.username
             usericon.src = `https://mcskin.sasadd.net/uuid/face/${v.uuid}?size=50`
@@ -183,7 +183,7 @@ async function updateAccounts() {
 async function toggleMain(direction: string) {
     toggleMain_lock = true
     const others = Array.from(main.getElementsByClassName('child'))
-    const current: HTMLDivElement = <HTMLDivElement>others[currentChild]
+    const current: HTMLDivElement = others[currentChild] as HTMLDivElement
 
     if (typeof current === 'undefined')
         return
@@ -212,7 +212,7 @@ async function toggleMain(direction: string) {
         }
         left = '-50%'
     }
-    const next = <HTMLDivElement>others[nextNum]
+    const next = others[nextNum] as HTMLDivElement
 
     if (typeof next === 'undefined')
         return
@@ -244,10 +244,8 @@ async function toggleMain(direction: string) {
  */
 
 
-let datapath:string
-
+let DATA_PATH: string
 const packUrl: string = "https://raw.githubusercontent.com/sasadd-LAB/SasaPacks2/master"
-
 const launcher = new Launcher()
 
 
@@ -255,9 +253,9 @@ const launcher = new Launcher()
  * 初期化関数
  */
 
-async function init(){
-    datapath = await ipcRenderer.invoke('getDataPath')
-    Logger.setPath(path.join(datapath, 'logs'))
+async function init() {
+    DATA_PATH = await ipcRenderer.invoke('getDataPath')
+    Logger.setPath(path.join(DATA_PATH, 'logs'))
     await ConfigurationManager.init()
     const config = ConfigurationManager.getConfig()
 
@@ -266,59 +264,59 @@ async function init(){
         console.log(error.name)
         overlay.Error('U:000', error.message)
     })
-    process.on('unhandledRejection',(reason)=>{
+    process.on('unhandledRejection', (reason) => {
         console.log(reason)
     })
-    process.on('uncaughtExceptionMonitor',(error,origin)=>{
-        console.log(error,origin)
+    process.on('uncaughtExceptionMonitor', (error, origin) => {
+        console.log(error, origin)
     })
 
-    const dataFolder: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('dataFolder')[0]
-    const java16: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('java16')[0]
-    const java8: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('java8')[0]
-    const XmxNumber: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('XmxNumber')[0]
-    const XmsNumber: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('XmsNumber')[0]
-    const XmxRange: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('XmxRange')[0]
-    const XmsRange: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('XmsRange')[0]
+    const dataFolder: HTMLInputElement = setting.getElementsByClassName('dataFolder')[0] as HTMLInputElement
+    const java16: HTMLInputElement = setting.getElementsByClassName('java16')[0] as HTMLInputElement
+    const java8: HTMLInputElement = setting.getElementsByClassName('java8')[0] as HTMLInputElement
+    const XmxNumber: HTMLInputElement = setting.getElementsByClassName('XmxNumber')[0] as HTMLInputElement
+    const XmsNumber: HTMLInputElement = setting.getElementsByClassName('XmsNumber')[0] as HTMLInputElement
+    const XmxRange: HTMLInputElement = setting.getElementsByClassName('XmxRange')[0] as HTMLInputElement
+    const XmsRange: HTMLInputElement = setting.getElementsByClassName('XmsRange')[0] as HTMLInputElement
     dataFolder.value = config.MinecraftDataFolder
     java16.value = config.java16
     java8.value = config.java8
-    if (config.Xmx){
+    if (config.Xmx) {
         XmxNumber.value = config.Xmx.replace('G', '')
         XmxRange.value = XmxNumber.value
     }
-    if(config.Xms){
+    if (config.Xms) {
         XmsNumber.value = config.Xms.replace('G', '')
         XmsRange.value = XmsNumber.value
     }
 
 
-    const accountsPath = path.join(datapath, "accounts.json")
-    if (!fs.existsSync(accountsPath)){
-        fs.writeJSONSync(accountsPath,[])
+    const accountsPath = path.join(DATA_PATH, "accounts.json")
+    if (!fs.existsSync(accountsPath)) {
+        fs.writeJSONSync(accountsPath, [])
     }
 
-    const mcdatapath = path.join(datapath,".minecraft")
-    if(!fs.existsSync(mcdatapath)){
+    const mcdatapath = path.join(DATA_PATH, ".minecraft")
+    if (!fs.existsSync(mcdatapath)) {
         fs.mkdirsSync(mcdatapath)
     }
 
 
     const response = await axios.get(`${packUrl}/distribution.json`)
-    fs.writeJSONSync(path.join(datapath, "distribution.json"), response.data, { spaces: 4 })
+    // fs.writeJSONSync(path.join(DATA_PATH, "distribution.json"), response.data, { spaces: 4 })
 
     await initDom()
 
     //mods
-    const distribution:Distribution = await ipcRenderer.invoke('getDistribution')
-    for (const server of distribution.servers){
+    const distribution: Distribution = await ipcRenderer.invoke('getDistribution')
+    for (const server of distribution.servers) {
         const modpath = path.join(config.MinecraftDataFolder, 'servers', server.id, 'mods')
         if (!fs.existsSync(modpath)) fs.mkdirsSync(modpath)
         for (const mod of fs.readdirSync(modpath)) {
-            const name = mod.replace('.disabled','')
-            const doc: HTMLInputElement = <HTMLInputElement>document.getElementById(`${server.id}_${name}`)
+            const name = mod.replace('.disabled', '')
+            const doc: HTMLInputElement = document.getElementById(`${server.id}_${name}`) as HTMLInputElement
             const disabled = fs.existsSync(path.join(modpath, `${name}.disabled`))
-            if(disabled){
+            if (disabled) {
                 doc.checked = false
             } else {
                 doc.checked = true
@@ -348,32 +346,32 @@ Auth.setup(ipcRenderer)
  * Mojangアカウントの追加
  * HTML onclick からの実行を想定
  */
-async function addMojangAccount(){
+async function addMojangAccount() {
     overlay.loading()
-    const email:HTMLInputElement = <HTMLInputElement> login.getElementsByClassName('email')[0]
-    const password:HTMLInputElement = <HTMLInputElement> login.getElementsByClassName('password')[0]
+    const email: HTMLInputElement = login.getElementsByClassName('email')[0] as HTMLInputElement
+    const password: HTMLInputElement = login.getElementsByClassName('password')[0] as HTMLInputElement
 
     try {
         const auth = await Auth.mojangAuth(email.value, password.value)
-        const accountsPath = path.join(datapath, "accounts.json")
+        const accountsPath = path.join(DATA_PATH, "accounts.json")
         const accounts: Account[] = fs.readJsonSync(accountsPath)
         accounts.push({
-            type:"mojang",
-            email:email.value,
-            password:password.value,
-            username:auth.name,
-            uuid:auth.uuid,
-            refreshToken:auth.client_token,
-            selected:accounts.length < 1
+            type: "mojang",
+            email: email.value,
+            password: password.value,
+            username: auth.name,
+            uuid: auth.uuid,
+            refreshToken: auth.client_token,
+            selected: accounts.length < 1
         })
-        fs.writeJSONSync(accountsPath, accounts,{ spaces: 4 })
+        fs.writeJSONSync(accountsPath, accounts, { spaces: 4 })
 
         await updateAccounts()
         overlay.close()
     } catch (error) {
-        const Lerror = <LauncherError>error 
+        const Lerror = <LauncherError>error
         Logger.error(<string>error)
-        overlay.Error(Lerror.code,Lerror.message)
+        overlay.Error(Lerror.code, Lerror.message)
     }
 
 }
@@ -384,31 +382,31 @@ async function addMojangAccount(){
  * @param code Microsoft Oauth の code 
  */
 
-async function addMicrosoftAccount(code:string){
+async function addMicrosoftAccount(code: string) {
     overlay.loading()
     try {
         const auth = await Auth.microsoftAuth(code)
-        const accountsPath = path.join(datapath, "accounts.json")
-        const accounts:Account[] = fs.readJsonSync(accountsPath)
-        if(accounts.filter(v=>v.uuid === auth.uuid).length > 0){
-            overlay.Error('A:005','すでにアカウントが存在します。')
+        const accountsPath = path.join(DATA_PATH, "accounts.json")
+        const accounts: Account[] = fs.readJsonSync(accountsPath)
+        if (accounts.filter(v => v.uuid === auth.uuid).length > 0) {
+            overlay.Error('A:005', 'すでにアカウントが存在します。')
             return
         }
         accounts.push({
-            type:"microsoft",
-            username:auth.name,
+            type: "microsoft",
+            username: auth.name,
             uuid: auth.uuid,
-            refreshToken:auth.client_token,
+            refreshToken: auth.client_token,
             selected: accounts.length < 1
         })
-        fs.writeJSONSync(accountsPath,accounts,{spaces:4})
+        fs.writeJSONSync(accountsPath, accounts, { spaces: 4 })
         await updateAccounts()
         overlay.close()
-        
+
     } catch (error) {
         const Lerror = <LauncherError>error
         Logger.error(<string>error)
-        overlay.Error(Lerror.code,Lerror.message)
+        overlay.Error(Lerror.code, Lerror.message)
     }
 }
 
@@ -417,26 +415,26 @@ async function addMicrosoftAccount(code:string){
  * ユーザー選択
  * @param uuid Minecraft アカウントのUUID
  */
-async function selectUser(uuid:string){
-    const accountsPath = path.join(datapath, "accounts.json")
+async function selectUser(uuid: string) {
+    const accountsPath = path.join(DATA_PATH, "accounts.json")
     const accounts: Account[] = fs.readJsonSync(accountsPath)
 
-    const account = accounts.filter(v=>v.uuid === uuid)[0]
+    const account = accounts.filter(v => v.uuid === uuid)[0]
     account.selected = true
 
     const accountEl = header.getElementsByClassName('account')[0]
-    const username:HTMLParagraphElement = <HTMLParagraphElement>accountEl.getElementsByClassName('username')[0]
-    const usericon:HTMLImageElement = <HTMLImageElement>accountEl.getElementsByClassName('usericon')[0]
+    const username: HTMLParagraphElement = accountEl.getElementsByClassName('username')[0] as HTMLParagraphElement
+    const usericon: HTMLImageElement = accountEl.getElementsByClassName('usericon')[0] as HTMLImageElement
 
     username.innerHTML = account.username
     usericon.src = `https://mcskin.sasadd.net/uuid/face/${account.uuid}?size=100`
 
-    const others = accounts.filter(v=>v.uuid !== uuid)
-    for(const v of others){
+    const others = accounts.filter(v => v.uuid !== uuid)
+    for (const v of others) {
         v.selected = false
     }
     others.push(account)
-    fs.writeJsonSync(accountsPath,others,{spaces:4})
+    fs.writeJsonSync(accountsPath, others, { spaces: 4 })
 
     currentAccount = uuid
 }
@@ -446,9 +444,9 @@ async function selectUser(uuid:string){
  * ログアウト
  * @param uuid MinecraftアカウントのUUID
  */
-async function logoutUser(uuid:string){
+async function logoutUser(uuid: string) {
     overlay.loading()
-    const accountsPath = path.join(datapath, "accounts.json")
+    const accountsPath = path.join(DATA_PATH, "accounts.json")
     const accounts: Account[] = fs.readJsonSync(accountsPath)
 
     const accountNew = accounts.filter(v => v.uuid !== uuid)
@@ -462,15 +460,19 @@ async function logoutUser(uuid:string){
  * Minecraftの起動
  * @param id 起動構成のID
  */
-async function launchMinecraft(id:string){
-    const modsDiv: HTMLDivElement = <HTMLDivElement>launch.getElementsByClassName('mods')[0]
-    const additional_modsDiv: HTMLDivElement = <HTMLDivElement>launch.getElementsByClassName('mods')[1]
+async function launchMinecraft(id: string) {
+    const server: HTMLDivElement = launch.getElementsByClassName(id)[0] as HTMLDivElement
+
+    const modsDiv: HTMLDivElement = server.getElementsByClassName('mods')[0] as HTMLDivElement
+    const additional_modsDiv: HTMLDivElement = server.getElementsByClassName('mods')[1] as HTMLDivElement
+
     const mods = modsDiv.getElementsByTagName('input')
     const additional_mods = additional_modsDiv.getElementsByTagName('input')
+
     const disableModList = []
-    
-    for(const v of mods){
-        if(!v.checked){
+
+    for (const v of mods) {
+        if (!v.checked) {
             disableModList.push(v.name)
         }
     }
@@ -481,21 +483,21 @@ async function launchMinecraft(id:string){
     }
 
     console.log(disableModList)
-    
+
     await overlay.showProgress()
     try {
         const client = await launcher.launch(currentAccount, id, disableModList)
         overlay.setProgress("loading", 0, 100)
         client.on('progress', (data) => {
-            overlay.setProgress(`Downloading: ${data.type} ...`, data.task, data.total)            
+            overlay.setProgress(`Downloading: ${data.type} ...`, data.task, data.total)
         })
-        client.on('data',async data => {
+        client.on('data', async data => {
             if (overlay.showing())
                 overlay.close()
-            
+
             const msg = <string>data
             console.log(msg)
-            if (msg.includes('Loading for game')){
+            if (msg.includes('Loading for game')) {
                 DiscordRPC.setActivity({
                     details: `${client.getServerOption().name} を起動中...`,
                     state: 'SasaLauncher2 v1.0.0',
@@ -503,7 +505,7 @@ async function launchMinecraft(id:string){
                     largeImageText: 'SasaLauncher3 v1.0.0',
                 })
             }
-            if (msg.includes('Setting user:')){
+            if (msg.includes('Setting user:')) {
                 await DiscordRPC.setActivity({
                     details: `${client.getServerOption().name} をプレイ中`,
                     state: `In Menu`,
@@ -511,8 +513,8 @@ async function launchMinecraft(id:string){
                     largeImageText: 'SasaLauncher2'
                 })
             }
-            if (msg.includes('Connecting to')){
-                const server = msg.replace(/(?<=,)(.*)/, '').replace(/(.*)(?=:)/,'').replace('Connecting to ','')
+            if (msg.includes('Connecting to')) {
+                const server = msg.replace(/(?<=,)(.*)/, '').replace(/(.*)(?=:)/, '').replace('Connecting to ', '')
                 await DiscordRPC.setActivity({
                     details: `${client.getServerOption().name} をプレイ中`,
                     state: `In ${server}`,
@@ -520,7 +522,7 @@ async function launchMinecraft(id:string){
                     largeImageText: 'SasaLauncher2'
                 })
             }
-            if (msg.includes('Time elapsed:')){
+            if (msg.includes('Time elapsed:')) {
                 await DiscordRPC.setActivity({
                     details: `${client.getServerOption().name} をプレイ中`,
                     state: `In : single player`,
@@ -528,11 +530,11 @@ async function launchMinecraft(id:string){
                     largeImageText: 'SasaLauncher2'
                 })
             }
-            if (msg.includes('Stopping singleplayer server')){
+            if (msg.includes('Stopping singleplayer server')) {
                 await DiscordRPC.setDefault()
             }
         })
-        client.on('close',async data => {
+        client.on('close', async data => {
             await DiscordRPC.setDefault()
         })
     } catch (error) {
@@ -546,26 +548,26 @@ async function launchMinecraft(id:string){
 /**
  * Configの保存
  */
-function saveConfiguration(){
+function saveConfiguration() {
     const config = ConfigurationManager.getConfig()
 
-    const MinecraftDataFolder: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('dataFolder')[0]
-    const java16Path: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('java16')[0]
-    const java8Path: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('java8')[0]
-    const XmxNumber: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('XmxNumber')[0]
-    const XmsNumber: HTMLInputElement = <HTMLInputElement>setting.getElementsByClassName('XmsNumber')[0]
+    const MinecraftDataFolder: HTMLInputElement = setting.getElementsByClassName('dataFolder')[0] as HTMLInputElement
+    const java16Path: HTMLInputElement = setting.getElementsByClassName('java16')[0] as HTMLInputElement
+    const java8Path: HTMLInputElement = setting.getElementsByClassName('java8')[0] as HTMLInputElement
+    const XmxNumber: HTMLInputElement = setting.getElementsByClassName('XmxNumber')[0] as HTMLInputElement
+    const XmsNumber: HTMLInputElement = setting.getElementsByClassName('XmsNumber')[0] as HTMLInputElement
 
     clearError(setting)
 
-    if (process.platform === 'win32' && ((!isEmpty(java16Path.value) && !java16Path.value.endsWith('java.exe')) || (!isEmpty(java8Path.value) && !java8Path.value.endsWith('java.exe')))){
+    if (process.platform === 'win32' && ((!isEmpty(java16Path.value) && !java16Path.value.endsWith('java.exe')) || (!isEmpty(java8Path.value) && !java8Path.value.endsWith('java.exe')))) {
         showError('Javaのパスは "java.exe" で終わる必要があります。', setting)
         return
     }
-    if (process.platform !== 'win32' && (((!isEmpty(java16Path.value) && !java16Path.value.endsWith('java')) || (!isEmpty(java8Path.value) && !java8Path.value.endsWith('java'))))){
+    if (process.platform !== 'win32' && (((!isEmpty(java16Path.value) && !java16Path.value.endsWith('java')) || (!isEmpty(java8Path.value) && !java8Path.value.endsWith('java'))))) {
         showError('Javaのパスは "java" で終わる必要があります。', setting)
         return
     }
-    if ((!isEmpty(java16Path.value) && !fs.existsSync(java16Path.value)) || (!isEmpty(java8Path.value) && !fs.existsSync(java8Path.value))){
+    if ((!isEmpty(java16Path.value) && !fs.existsSync(java16Path.value)) || (!isEmpty(java8Path.value) && !fs.existsSync(java8Path.value))) {
         showError('指定されたJavaのパスが見つかりません。', setting)
         return
     }
@@ -584,7 +586,7 @@ function saveConfiguration(){
 
 
 async function checkUpdate() {
-    let doc: HTMLInputElement = <HTMLInputElement>document.createElement("div")
+    let doc: HTMLInputElement = document.createElement("div") as HTMLInputElement
     doc.innerHTML = "<h1>アップデートを確認中...</h1>"
     await overlay.show(doc)
     ipcRenderer.send("autoUpdateAction", "checkForUpdate")
@@ -593,7 +595,7 @@ async function checkUpdate() {
 ipcRenderer.on('autoUpdateNotification', async (event: IpcRendererEvent, arg: string, info: any) => {
     switch (arg) {
         case 'checking-for-update': {
-            let doc: HTMLInputElement = <HTMLInputElement>document.createElement("div")
+            let doc: HTMLInputElement = document.createElement("div") as HTMLInputElement
             doc.innerHTML =
                 `<h1>アップデートを確認中...</h1>
                 <p>Checking for update...</p>`
@@ -602,20 +604,20 @@ ipcRenderer.on('autoUpdateNotification', async (event: IpcRendererEvent, arg: st
         }
         case 'update-available': {
             if (overlay.showing()) {
-                let doc: HTMLInputElement = <HTMLInputElement>document.createElement("div")
+                let doc: HTMLInputElement = document.createElement("div") as HTMLInputElement
                 doc.innerHTML =
                     `<h1>アップデートを確認中...</h1>
                     <p>Downloading version ${info.version} ...</p>`
                 overlay.change(doc)
             }
             ipcRenderer.send("autoUpdateAction", "downloadUpdate")
-            const UpdateNoticeParagraph:HTMLParagraphElement = <HTMLParagraphElement>document.getElementById('UpdateNoticeParagraph')
+            const UpdateNoticeParagraph: HTMLParagraphElement = document.getElementById('UpdateNoticeParagraph') as HTMLParagraphElement
             UpdateNoticeParagraph.style.opacity = "1"
             break
         }
         case 'update-downloaded': {
             if (overlay.showing()) {
-                let doc: HTMLInputElement = <HTMLInputElement>document.createElement("div")
+                let doc: HTMLInputElement = document.createElement("div") as HTMLInputElement
                 doc.innerHTML =
                     `<h1>アップデートが見つかりました。</h1>
                 <p>インストールしますか？</p>`
@@ -630,7 +632,7 @@ ipcRenderer.on('autoUpdateNotification', async (event: IpcRendererEvent, arg: st
         }
         case 'update-not-available': {
             if (overlay.showing()) {
-                let doc: HTMLInputElement = <HTMLInputElement>document.createElement("div")
+                let doc: HTMLInputElement = document.createElement("div") as HTMLInputElement
                 doc.innerHTML =
                     `<h1>アップデートは見つかりませんでした</h1>`
                 overlay.change(doc)
@@ -670,7 +672,7 @@ ipcRenderer.on('MicrosoftOAuth', (event: IpcRendererEvent, arg: string, data: an
  *  Additional code
  */
 
-function isEmpty(obj:string) {
+function isEmpty(obj: string) {
     return !Object.keys(obj).length;
 }
 function clearError(parent: HTMLElement) {

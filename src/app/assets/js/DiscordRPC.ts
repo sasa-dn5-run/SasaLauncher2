@@ -1,4 +1,4 @@
-import { Client, Presence, RPCClientOptions } from 'discord-rpc'
+import { Client, Presence } from 'discord-rpc'
 
 class DiscordRPC{
   private static client:Client

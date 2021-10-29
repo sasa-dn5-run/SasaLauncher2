@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from "child_process";
+import { spawnSync } from "child_process";
 import fs from 'fs-extra'
 import path from 'path'
 import { ConfigurationManager } from "./ConfigurationManager";

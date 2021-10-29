@@ -1,7 +1,5 @@
 import axios from "axios"
-import { IpcRenderer } from "electron"
-import { MicrosoftAccount, MicrosoftAuth } from "minecraft-auth"
-import { Client, ILauncherOptions } from "minecraft-launcher-core"
+import { Client } from "minecraft-launcher-core"
 import path from "path"
 import fs from "fs-extra"
 import crypto from "crypto"
@@ -10,11 +8,7 @@ import { Account } from "./model/account"
 import { Distribution, File, Mod, ServerOption } from "./model/Distribution"
 import { Auth } from "./Auth"
 import { ConfigurationManager } from "./ConfigurationManager"
-import { execSync } from "child_process"
 import { Java, JavaError } from "./Java"
-
-import { Logger } from './Logger'
-import { DiscordRPC } from "./DiscordRPC"
 
 let datapath:string
 let distroLink:string
@@ -26,14 +20,12 @@ let distroLink:string
 
 class Launcher{
 
-
     /**
      * @param uuid Minecraft アカウントのUUID
      * @param id 起動構成のID
      * @param disableModList 無効にするModのリスト
-     * @returns 
+     * @returns クライアントインスタンス
      */
-
     public launch(uuid:string,id:string,disableModList:Array<string>):Promise<SasaClient>{
         return new Promise(async(resolve,reject)=>{
             const config = ConfigurationManager.getConfig()
@@ -72,12 +64,18 @@ class Launcher{
             }
 
             IOption.javaPath = java
-            IOption.root = path.join(datapath, '.minecraft')
+
+            if (!option.option.root || Object.keys(option.option.root).length === 0) IOption.root = path.join(datapath, '.minecraft')
+            else IOption.root = this.pathResolve(option.option.root)
+
             IOption.overrides.gameDirectory = path.join(config.MinecraftDataFolder, 'servers', option.id)
             IOption.memory.max = config.Xmx
             IOption.memory.min = config.Xms
 
+            if(option.option.forge) IOption.forge = this.pathResolve(option.option.forge)
+
             option.option = IOption
+            console.log(IOption)
 
             const client = new SasaClient(option)
             client.launch(IOption)
@@ -105,8 +103,6 @@ class Launcher{
     }
 
     private async saveFiles(files:File[]){
-        const config = ConfigurationManager.getConfig()
-
         for (const v of files) {
             const filePath = this.pathResolve(v.path)
             const fileDir = path.join(this.pathResolve(v.path), '..')
@@ -167,9 +163,11 @@ class Launcher{
 
     private pathResolve(p:string):string{
         const config = ConfigurationManager.getConfig()
-        return path.resolve(p
+        const userDir = process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"] as string
+        return path.join(p
             .replace('${MCDATADIR}', path.join(config.MinecraftDataFolder,'servers'))
             .replace('${MCLIBDIR}', path.join(datapath, ".minecraft")))
+            .replace('${APPDATA}', process.platform == "win32" ? path.join(userDir, 'AppData', 'Roaming') : process.platform == "darwin" ? path.join(userDir, 'Library', 'Application Support') : userDir)
     }
 
 }
