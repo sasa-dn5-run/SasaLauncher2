@@ -49,6 +49,9 @@ class Java {
             }
         }
 
+        process.env.JAVA_HOME = javaDir
+        process.env["PATH"] = `${javaDir}/bin:${process.env["PATH"]}`
+
         return process.platform === 'darwin' ? path.join(javaDir, javas[0], 'Contents', 'Home', 'bin', ext) : path.join(javaDir, javas[0], 'bin', ext)
     }
 
