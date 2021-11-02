@@ -52,7 +52,7 @@ class Java {
         process.env.JAVA_HOME = javaDir
         process.env["PATH"] = `${javaDir}/bin:${process.env["PATH"]}`
 
-        return path.join(javaDir, javas[0], 'bin', ext)
+        return process.platform === 'darwin' ? path.join(javaDir, javas[0], 'Contents', 'Home', 'bin', ext) : path.join(javaDir, javas[0], 'bin', ext)
     }
 
     private static async installJava() {
