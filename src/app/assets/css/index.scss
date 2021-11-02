@@ -651,8 +651,9 @@ html {
         text-align: left;
         margin: 0;
         overflow-y: scroll;
+        overflow-x: hidden;
         width: 70%;
-        height: 80%;
+        height: 75%;
         p{
             user-select: text;
             font-size: 0.6rem;

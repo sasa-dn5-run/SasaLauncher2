@@ -1,7 +1,6 @@
 
 import { app, App, AutoUpdater, BrowserWindow, IpcMain, ipcMain, IpcMainEvent, IpcMainInvokeEvent, Menu, Session, Tray } from 'electron'
 import { autoUpdater, AppUpdater } from 'electron-updater'
-import log from 'electron-log'
 
 import path from 'path'
 import fs from 'fs-extra'
@@ -22,10 +21,6 @@ const redirectURL = config.redirect
 
 const distroLink = 'https://raw.githubusercontent.com/sasadd-LAB/SasaPacks2/master'
 
-process.on('uncaughtException',(err)=>{
-    log.error(err);
-})
-
 export class MainApp {
 
     public static readonly DATA_PATH = process.env.DATAPATH || path.join(
@@ -34,7 +29,7 @@ export class MainApp {
         || (process.platform == 'linux' ? process.env.HOME + '/.sasalauncher2' : process.env.HOME) as string, '.sasalauncher2')
 
     private ejse = require('ejs-electron')
-    private mainURL: string = `file:/${appPath}/app.ejs`
+    private mainURL: string = `file:${appPath}/app.ejs`
 
     private mainWindow: BrowserWindow | null = null
     private app: App

@@ -7,10 +7,6 @@ import { ServerOption } from "../model/Distribution";
 
 export class DOMBuilder {
 
-    constructor() {
-
-    }
-
     //
     //サーバー関連のDOM
     //
@@ -21,10 +17,14 @@ export class DOMBuilder {
      * @returns 
      */
     public buildServer(v: ServerOption) {
+        const modBuilder = new this.ModBuilder()
         const server = document.createElement('div')
         server.classList.add('server')
-        let modsHTML = this.buildMods(v.id, v.mods)
-        let additional_mods = this.buildAdditionalMods(v.id, v.mods)
+        const normalModList = v.mods.filter(v2 => v2.level !== 'require')
+        const requireModList = v.mods.filter(v2 => v2.level === 'require')
+        let Mods = modBuilder.buildOptionalMods(v.id, normalModList)
+        let requireMods = modBuilder.buildRequireMods(v.id, requireModList)
+        let additionalMods = modBuilder.buildAdditionalMods(v.id, v.mods)
         server.innerHTML =
             `<div class="wrapper ${v.id}">
                 <div class="info">
@@ -34,10 +34,13 @@ export class DOMBuilder {
                 </div>
                 <p class="material-icons launchButton" onclick="launchMinecraft('${v.id}')">play_circle_filled</p>
                 <div class="mods">
-                    ${modsHTML}
+                    ${Mods}
                 </div>
                 <div class="mods">
-                    ${additional_mods}
+                    ${requireMods}
+                </div>
+                <div class="mods">
+                    ${additionalMods}
                 </div>
                 <div class="addAdditionalMod">
                     <h2>MODを追加する</h2>
@@ -47,39 +50,59 @@ export class DOMBuilder {
         return server
     }
 
-    public buildMods(id: string, mods: ServerOption['mods']) {
-        let inner = '<p style="color:#325239; margin:0; margin-left:5px;">MOD</p>'
-        for (const m of mods) {
-            const html = this.buildMod(id, m.name)
-            inner += html
+    public ModBuilder = class {
+        public buildOptionalMods(id: string, mods: ServerOption['mods']) {
+            if (mods.length === 0)
+                return ''
+            let inner = '<p style="color:#325239; margin:0; margin-left:5px;">Optional Mods</p>'
+            for (const m of mods) {
+                const html = this.buildOptionalMod(id, m.name)
+                inner += html
+            }
+            return inner
         }
-        return inner
-    }
-    public buildMod(id:string , name: string){
-        return `<div class="mod ${id}_${name}">
+        public buildOptionalMod(id: string, name: string) {
+            return `<div class="mod ${id}_${name}">
                 <h2>${name}</h2>
                 <div style="text-align: center;" class="toggle_switch">
                     <input type="checkbox" name="${name}" id="${id}_${name}" style="display: none;">
                     <label class="check" for="${id}_$name}"></label>
                 </div>
             </div>`
-    }
-    public buildAdditionalMods(id:string, mods: ServerOption['mods']) {
-        const config = ConfigurationManager.getConfig()
-        let inner = '<p style="color:#325239; margin:0; margin-left:5px;">Additional Mods</p>'
-        if (fs.existsSync(path.join(config.MinecraftDataFolder, 'servers', id, 'mods'))) {
-            for (const m of fs.readdirSync(path.join(config.MinecraftDataFolder, 'servers', id, 'mods'))) {
-                const name = m.replace('.disabled', '')
-                if (mods.filter(v2 => v2.name === name).length !== 0)
-                    continue
-                const html = this.buildAdditionalMod(id, name)
+        }
+        public buildRequireMods(id: string, mods: ServerOption['mods']) {
+            if (mods.length === 0)
+                return ''
+            const config = ConfigurationManager.getConfig()
+            let inner = '<p style="color:#325239; margin:0; margin-left:5px;">Require Mods</p>'
+            for (const m of mods) {
+                const html = this.buildRequireMod(id, m.name)
                 inner += html
             }
+            return inner
         }
-        return inner
-    }
-    public buildAdditionalMod(id: string, name: string){
-        return  `<div class="mod ${id}_${name}">
+        public buildRequireMod(id: string, name: string) {
+            return `<div class="mod ${id}_${name}">
+                <h2>${name}</h2>
+                <div></div>
+            </div>`
+        }
+        public buildAdditionalMods(id: string, mods: ServerOption['mods']) {
+            const config = ConfigurationManager.getConfig()
+            let inner = '<p style="color:#325239; margin:0; margin-left:5px;">Additional Mods</p>'
+            if (fs.existsSync(path.join(config.MinecraftDataFolder, 'servers', id, 'mods'))) {
+                for (const m of fs.readdirSync(path.join(config.MinecraftDataFolder, 'servers', id, 'mods'))) {
+                    const name = m.replace('.disabled', '')
+                    if (mods.filter(v2 => v2.name === name).length !== 0)
+                        continue
+                    const html = this.buildAdditionalMod(id, name)
+                    inner += html
+                }
+            }
+            return inner
+        }
+        public buildAdditionalMod(id: string, name: string) {
+            return `<div class="mod ${id}_${name}">
                 <h2>${name}</h2>
                 <div class="buttons">
                     <p class="material-icons modDeleteButton" onclick="removeAdditionalMod('${id}', '${name}')">delete</p>
@@ -89,7 +112,9 @@ export class DOMBuilder {
                     </div>
                 </div>
             </div>`
+        }
     }
+    
 
     //
     // アカウント関連のDOM

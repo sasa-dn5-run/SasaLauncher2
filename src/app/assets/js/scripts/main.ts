@@ -16,6 +16,26 @@ import { IpcRendererEvent } from "electron/main";
 /**
  * doms
  */
+const appclosebutton: HTMLInputElement = <HTMLInputElement>document.getElementById('appclosebutton')
+const apphidebutton: HTMLInputElement = <HTMLInputElement>document.getElementById('apphidebutton')
+const appmaximizebutton: HTMLInputElement = <HTMLInputElement>document.getElementById('appmaximizebutton')
+
+appclosebutton.addEventListener('click', function () {
+    const window = remote.getCurrentWindow()
+    window.close()
+})
+apphidebutton.addEventListener('click', function () {
+    const window = remote.getCurrentWindow()
+    window.minimize()
+})
+appmaximizebutton.addEventListener('click', function () {
+    const window = remote.getCurrentWindow()
+    if (window.isMaximized()) {
+        window.unmaximize()
+    } else {
+        window.maximize()
+    }
+})
 
 const header: HTMLDivElement = document.getElementById('header') as HTMLDivElement
 const main: HTMLDivElement = document.getElementById('main') as HTMLDivElement
@@ -25,7 +45,6 @@ const account: HTMLDivElement = document.getElementById('account') as HTMLDivEle
 const setting: HTMLDivElement = document.getElementById('setting') as HTMLDivElement
 const debugLog: HTMLDivElement = document.getElementById('debugLog') as HTMLDivElement
 
-const mainChildren: Element[] = Array.from(main.getElementsByClassName('current'))
 let currentChild: number = 0
 
 let toggleMain_lock: boolean = false
@@ -497,8 +516,8 @@ async function addAdditionalMod(id: string) {
         const modName = path.basename(modPath)
         const mod = document.createElement('div')
         mod.className = 'mod'
-        mod.innerHTML = domBuilder.buildAdditionalMod(id, modName)
-        const modsDiv: HTMLDivElement = launch.getElementsByClassName(id)[0].getElementsByClassName('mods')[1] as HTMLDivElement
+        mod.innerHTML = (new domBuilder.ModBuilder()).buildAdditionalMod(id, modName)
+        const modsDiv: HTMLDivElement = launch.getElementsByClassName(id)[0].getElementsByClassName('mods')[2] as HTMLDivElement
         modsDiv.appendChild(mod)
         launcher.addAdditionalMod(id, modPath)
     }
@@ -508,7 +527,7 @@ async function removeAdditionalMod(id: string, modName: string){
     doc.innerHTML = 'Modを削除しますか？'
     const question = await overlay.question(doc)
     if(question){
-        const modsDiv: HTMLDivElement = launch.getElementsByClassName(id)[0].getElementsByClassName('mods')[1] as HTMLDivElement
+        const modsDiv: HTMLDivElement = launch.getElementsByClassName(id)[0].getElementsByClassName('mods')[2] as HTMLDivElement
         const mod = modsDiv.getElementsByClassName(`${id}_${modName}`)[0]
         mod.remove()
         launcher.removeAdditionalMod(id, modName)

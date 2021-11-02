@@ -10,20 +10,22 @@ const pkg = fs.readJSONSync(path.join(__dirname, "..", "package.json"))
 
 class Builder {
 
-    private readonly version: string = (process.env.VERSION as string).split(".").length === 3 ? (process.env.VERSION as string) : "0.0.0"
+    private readonly version: string = !!process.env.VERSION && (process.env.VERSION as string).split(".").length === 3 ? (process.env.VERSION as string) : "0.0.0"
     private readonly platform: string = (process.argv.length > 3 && !process.argv[3].startsWith("--")) ? process.argv[3] : process.platform
 
     private readonly extraOptions: string[] = []
 
     public static Main() {
         const builder = new Builder()
+
         for(const v of process.argv){
             if(v.startsWith("--")){
                 builder.extraOptions.push(v)
             }
         }
-        const arg1 = process.argv[2]
-        switch (arg1) {
+
+        const method = process.argv[2]
+        switch (method) {
             case "compile": {
                 builder.compile()
                 break
@@ -37,10 +39,10 @@ class Builder {
     public compile() {
         if(this.extraOptions.includes('--clean') && fs.existsSync('./dist'))
             fs.removeSync('./dist')
-        if (this.extraOptions.includes("--full"))
+        if (this.extraOptions.includes("--full")){
             this.rewriteVersion()
             execSync(`gpg --quiet --batch --yes --decrypt --passphrase=${process.env.GPGPASS} --output src/config.json secret.json.gpg`)
-       
+        }
         
         process.stdout.write("Compiling...\n")
         execSync(path.resolve("node_modules/.bin/tsc"))

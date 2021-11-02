@@ -52,14 +52,18 @@ export class SasaClient extends Client {
         if(!this.option.forgeLib) return
 
         const DATA_PATH = await ipcRenderer.invoke('getDataPath')
-        const MCLIBDIR = path.join(DATA_PATH, '.minecraft')
         const url = this.option.forgeLib
+        const MCLIBDIR = path.join(DATA_PATH, '.minecraft')
+        const temp = path.join(MCLIBDIR, 'forgeLibCache', path.basename(url))
         const client = url.startsWith('https') ? https : http
+
+        if(!fs.existsSync(path.dirname(temp))) fs.mkdirpSync(path.dirname(temp))
+        if(fs.existsSync(temp)) return
         
         try {
             await new Promise<void>((resolve, reject) => {
                 client.get(url, (res) => {
-                    const ws = fs.createWriteStream(path.join(MCLIBDIR, 'forge.zip'))
+                    const ws = fs.createWriteStream(temp)
                     const total = res.headers['content-length']
                     res.on('data', (chunk) => {
                         this.emit('task', {
@@ -84,7 +88,7 @@ export class SasaClient extends Client {
             })
 
             await new Promise<void>((resolve, reject)=>{
-                fs.createReadStream(path.join(MCLIBDIR, 'forge.zip'))
+                fs.createReadStream(temp)
                     .pipe(unzip.Extract({ path: path.join(MCLIBDIR, 'libraries') }))
                 .on('error',(err)=>{
                     reject(err)
@@ -93,8 +97,6 @@ export class SasaClient extends Client {
                     resolve()
                 })
             })
-
-            fs.removeSync(path.join(MCLIBDIR, 'forge.zip'))
         } catch (error) {
             throw error
         }
