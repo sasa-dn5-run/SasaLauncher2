@@ -1,10 +1,8 @@
 import { Mod } from "./Distribution";
 
 interface Configuration {
-    MinecraftDataFolder:string,
-    java16:string,
-    java8:string,
-    Xmx:string,
+    MinecraftDataFolder:string
+    Xmx:string
     Xms:string
 }
 
