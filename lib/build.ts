@@ -169,9 +169,9 @@ class Builder {
                 fs.mkdirsSync(path.resolve(dest, fileName, ".."))
             }
             copied++
-            process.stdout.clearLine(0)
-            process.stdout.cursorTo(0)
-            process.stdout.write(`Copying ${files.indexOf(file)}/${files.length} :${fileName}...`)
+            // process.stdout.clearLine(0)
+            // process.stdout.cursorTo(0)
+            // process.stdout.write(`Copying ${files.indexOf(file)}/${files.length} :${fileName}...`)
             fs.copySync(file, destFile)
         }
         process.stdout.write(`\nCopied ${copied} files.\n`)
