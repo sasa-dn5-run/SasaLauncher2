@@ -220,15 +220,11 @@ async function init() {
 
     Logger.info('Initializing...')
     const dataFolder: HTMLInputElement = setting.getElementsByClassName('dataFolder')[0] as HTMLInputElement
-    const java16: HTMLInputElement = setting.getElementsByClassName('java16')[0] as HTMLInputElement
-    const java8: HTMLInputElement = setting.getElementsByClassName('java8')[0] as HTMLInputElement
     const XmxNumber: HTMLInputElement = setting.getElementsByClassName('XmxNumber')[0] as HTMLInputElement
     const XmsNumber: HTMLInputElement = setting.getElementsByClassName('XmsNumber')[0] as HTMLInputElement
     const XmxRange: HTMLInputElement = setting.getElementsByClassName('XmxRange')[0] as HTMLInputElement
     const XmsRange: HTMLInputElement = setting.getElementsByClassName('XmsRange')[0] as HTMLInputElement
     dataFolder.value = config.MinecraftDataFolder
-    java16.value = config.java16
-    java8.value = config.java8
     if (config.Xmx) {
         XmxNumber.value = config.Xmx.replace('G', '')
         XmxRange.value = XmxNumber.value
@@ -541,29 +537,10 @@ function saveConfiguration() {
     const config = ConfigurationManager.getConfig()
 
     const MinecraftDataFolder: HTMLInputElement = setting.getElementsByClassName('dataFolder')[0] as HTMLInputElement
-    const java16Path: HTMLInputElement = setting.getElementsByClassName('java16')[0] as HTMLInputElement
-    const java8Path: HTMLInputElement = setting.getElementsByClassName('java8')[0] as HTMLInputElement
     const XmxNumber: HTMLInputElement = setting.getElementsByClassName('XmxNumber')[0] as HTMLInputElement
     const XmsNumber: HTMLInputElement = setting.getElementsByClassName('XmsNumber')[0] as HTMLInputElement
 
-    clearError(setting)
-
-    if (process.platform === 'win32' && ((!isEmpty(java16Path.value) && !java16Path.value.endsWith('java.exe')) || (!isEmpty(java8Path.value) && !java8Path.value.endsWith('java.exe')))) {
-        showError('Javaのパスは "java.exe" で終わる必要があります。', setting)
-        return
-    }
-    if (process.platform !== 'win32' && (((!isEmpty(java16Path.value) && !java16Path.value.endsWith('java')) || (!isEmpty(java8Path.value) && !java8Path.value.endsWith('java'))))) {
-        showError('Javaのパスは "java" で終わる必要があります。', setting)
-        return
-    }
-    if ((!isEmpty(java16Path.value) && !fs.existsSync(java16Path.value)) || (!isEmpty(java8Path.value) && !fs.existsSync(java8Path.value))) {
-        showError('指定されたJavaのパスが見つかりません。', setting)
-        return
-    }
-
     config.MinecraftDataFolder = MinecraftDataFolder.value
-    config.java16 = java16Path.value
-    config.java8 = java8Path.value
     config.Xmx = `${XmxNumber.value}G`
     config.Xms = `${XmsNumber.value}G`
 

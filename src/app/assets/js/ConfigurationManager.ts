@@ -15,8 +15,6 @@ class ConfigurationManager{
         
         const config: Configuration = {
             MinecraftDataFolder: path.join(DATA_PATH,"servers"),
-            java16:'',
-            java8:'',
             Xmx:'4G',
             Xms:'4G'
         }
