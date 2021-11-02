@@ -261,6 +261,7 @@ async function init() {
         for (const mod of fs.readdirSync(modpath)) {
             const name = mod.replace('.disabled', '')
             const doc: HTMLInputElement = document.getElementById(`${server.id}_${name}`) as HTMLInputElement
+            if(!doc) continue
             const disabled = fs.existsSync(path.join(modpath, `${name}.disabled`))
             if (disabled) {
                 doc.checked = false
@@ -409,24 +410,16 @@ async function logoutUser(uuid: string) {
 async function launchMinecraft(id: string) {
     const server: HTMLDivElement = launch.getElementsByClassName(id)[0] as HTMLDivElement
 
-    const modsDiv: HTMLDivElement = server.getElementsByClassName('mods')[0] as HTMLDivElement
-    const additional_modsDiv: HTMLDivElement = server.getElementsByClassName('mods')[1] as HTMLDivElement
-
-    const mods = modsDiv.getElementsByTagName('input')
-    const additional_mods = additional_modsDiv.getElementsByTagName('input')
-
-    const disableModList = []
-
-    for (const v of mods) {
-        if (!v.checked) {
-            disableModList.push(v.name)
+    const disableModList:string[] = []
+    for (const doc of server.getElementsByClassName('mods')){
+        for (const v of doc.getElementsByTagName('input')){
+            if(!v.checked){
+                disableModList.push(v.name)
+            }
         }
     }
-    for (const v of additional_mods) {
-        if (!v.checked) {
-            disableModList.push(v.name)
-        }
-    }
+
+    Logger.debug(`Disabled mods ${disableModList}`)
 
     await overlay.showProgress()
     try {

@@ -66,7 +66,7 @@ export class DOMBuilder {
                 <h2>${name}</h2>
                 <div style="text-align: center;" class="toggle_switch">
                     <input type="checkbox" name="${name}" id="${id}_${name}" style="display: none;">
-                    <label class="check" for="${id}_$name}"></label>
+                    <label class="check" for="${id}_${name}"></label>
                 </div>
             </div>`
         }
