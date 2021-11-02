@@ -4,16 +4,24 @@ import glob from "glob"
 import sass from "sass"
 import crypto from "crypto"
 import replace from "replace-in-file"
-import builder from "electron-builder"
+import { Arch, build, CliOptions, Platform } from "electron-builder"
 import { execSync } from "child_process"
+const pkg = fs.readJSONSync(path.join(__dirname, "..", "package.json"))
 
 class Builder {
 
-    private readonly version: string = <string>process.env.VERSION
-    private readonly platform: string = process.argv[3] || process.platform
+    private readonly version: string = (process.env.VERSION as string).split(".").length === 3 ? (process.env.VERSION as string) : "0.0.0"
+    private readonly platform: string = (process.argv.length > 3 && !process.argv[3].startsWith("--")) ? process.argv[3] : process.platform
+
+    private readonly extraOptions: string[] = []
 
     public static Main() {
         const builder = new Builder()
+        for(const v of process.argv){
+            if(v.startsWith("--")){
+                builder.extraOptions.push(v)
+            }
+        }
         const arg1 = process.argv[2]
         switch (arg1) {
             case "compile": {
@@ -27,9 +35,13 @@ class Builder {
         }
     }
     public compile() {
-        if(fs.existsSync('./dist')){
+        if(this.extraOptions.includes('--clean') && fs.existsSync('./dist'))
             fs.removeSync('./dist')
-        }
+        if (this.extraOptions.includes("--full"))
+            this.rewriteVersion()
+            execSync(`gpg --quiet --batch --yes --decrypt --passphrase=${process.env.GPGPASS} --output src/config.json secret.json.gpg`)
+       
+        
         process.stdout.write("Compiling...\n")
         execSync(path.resolve("node_modules/.bin/tsc"))
         for (const v of glob.sync("./src/**/*")) {
@@ -55,23 +67,22 @@ class Builder {
         fs.copyFileSync('./package.json','./dist/package.json')
     }
     public rewriteVersion() {
-        process.stdout.write("Rewriting version...\n")
+        process.stdout.write(`Rewriting version... ${this.version}\n`)
         const version = this.version
-        const regex = /(?<=version = ").*(?=";)/
-        const options = {
-            files: "./package.json",
-            from: regex,
-            to: version
-        }
-        replace.replaceInFileSync(options)
+        const json = fs.readJSONSync('./package.json')
+        json.version = version
+        fs.writeJSONSync('./package.json', json, {spaces:4})
     }
     public async build() {
+        if ((this.extraOptions.includes("--clean") || this.extraOptions.includes("--full")) && fs.existsSync('./product'))
+            fs.removeSync('./product')
+        
+        this.compile()
         process.stdout.write("Building...\n")
-        const config = {
-            targets: [this.getCurrentPlatform()],
+        const config:CliOptions = {
             config: {
-                appId: 'CraftPanel',
-                productName: 'CraftPanel',
+                appId: pkg.name,
+                productName: pkg.name,
                 artifactName: '${productName}-setup.${ext}',
                 copyright: 'Copyright © 2021 ddPn08',
                 directories: {
@@ -79,7 +90,7 @@ class Builder {
                     output: './product'
                 },
                 extraMetadata: {
-                    main: "./dist/index.js"
+                    main: "./dist/app.js"
                 },
                 win: {
                     target: [
@@ -103,8 +114,7 @@ class Builder {
                     target: 'AppImage',
                     maintainer: 'ddPn08',
                     vendor: 'ddPn08',
-                    synopsis: 'マインクラフトサーバーを簡単に立てられるソフトウェア',
-                    description: 'マイクラサーバーをいままでにないほど簡単に。数回のぽちっとでサーバーが立てられる。',
+                    description: pkg.description,
                     category: 'Game'
                 },
                 compression: 'maximum',
@@ -116,19 +126,20 @@ class Builder {
             }
         }
         try {
-            await builder.build(<builder.CliOptions>(<unknown>config))
+            await build((<unknown>config) as CliOptions)
         } catch (error) {
             throw error
         }
     }
-    private getCurrentPlatform(): builder.Platform {
+    private getCurrentPlatform(): Platform {
+        console.log(this.platform)
         switch (this.platform) {
             case "win32":
-                return builder.Platform.WINDOWS
+                return Platform.WINDOWS
             case "darwin":
-                return builder.Platform.MAC
+                return Platform.MAC
             case "linux":
-                return builder.Platform.LINUX
+                return Platform.LINUX
             default:
                 throw new Error("Unsupported platform")
         }
