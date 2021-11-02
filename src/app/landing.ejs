@@ -36,6 +36,12 @@
     </div>
 </div>
 <div id="main">
+    <div id="debugLog" class="child def_text none_select">
+        <h2>Debug Log</h2>
+        <p>ここに表示されている内容は開発者以外には絶対に公開しないでください。<br>Ctrl + Shift + I キーを同時に押すとより詳しい情報を確認できます。</p>
+        <div class="log">
+        </div>
+    </div>
     <div id="setting" class="child def_text none_select">
         <h1>設定</h1>
         <div class="inputSpace">
@@ -44,12 +50,14 @@
                 <input type="text" class="dataFolder" placeholder="">
             </div>
             <div class="input">
-                <p>Java16のパス</p>
-                <input type="text" class="java16" placeholder="C:\Program Files\Eclipse Foundation\jdk-16.0.2.7-hotspot\bin\java.exe">
+                <p>Version16移行のJavaのパス</p>
+                <input type="text" class="java16"
+                    placeholder="C:\Program Files\Eclipse Foundation\jdk-16.0.2.7-hotspot\bin\java.exe">
             </div>
             <div class="input">
-                <p>Java8のパス</p>
-                <input type="text" class="java8" placeholder="C:\Program Files\Eclipse Foundation\jdk-8.0.302.8-hotspot\bin\java.exe">
+                <p>Version16以前のJavaのパス</p>
+                <input type="text" class="java8"
+                    placeholder="C:\Program Files\Eclipse Foundation\jdk-8.0.302.8-hotspot\bin\java.exe">
             </div>
             <div class="input">
                 <p>最大メモリ割り当て</p>
@@ -68,6 +76,50 @@
             <div class="button green">
                 <p onclick="saveConfiguration()">保存</p>
             </div>
+        </div>
+    </div>
+    <div id="launch" class="child def_text none_select">
+        <h1>起動</h1>
+        <div class="servers">
+
+            <div class="server">
+                <div class="wrapper ${v.id}">
+                    <div class="info">
+                        <h1 class="title">${v.name}</h1>
+                        <p class="version">${v.option.version.number}</p>
+                        <p class="description">${v.description}</p>
+                    </div>
+                    <p class="material-icons launchButton" onclick="launchMinecraft('${v.id}')">play_circle_filled</p>
+                    <div class="mods">
+                        <p style="color:#325239; margin:0; margin-left:5px;">MOD</p>
+                        <div class="mod">
+                            <h2>${m.name}</h2>
+                            <div style="text-align: center;" class="toggle_switch">
+                                <input type="checkbox" name="${m.name}" id="${v.id}_${m.name}" style="display: none;">
+                                <label class="check" for="${v.id}_${m.name}"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mods">
+                        <p style="color:#325239; margin:0; margin-left:5px;">Additional Mods</p>
+                        <div class="mod">
+                            <h2>${name}</h2>
+                            <div class="buttons">
+                                <p class="material-icons modDeleteButton">delete</p>
+                                <div style="text-align: center;" class="toggle_switch">
+                                    <input type="checkbox" name="${name}" id="${v.id}_${name}" style="display: none;">
+                                    <label class="check" for="${v.id}_${name}"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="addAdditionalMod">
+                        <h2>MODを追加する</h2>
+                        <p class="material-icons" onclick="addAdditionalMod('${v.id}')">note_add</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     <div id="login" class="child def_text none_select">
@@ -91,51 +143,9 @@
             </div>
         </div>
     </div>
-    <div id="launch" class="child def_text none_select">
-        <h1>起動</h1>
-        <div class="servers">
-            <!-- <div class="server">
-                <div class="wrapper">
-                    <div class="info">
-                        <h1 class="title">サンプル</h1>
-                        <p class="description">サンプルの構成です。</p>
-                    </div>
-                    <p class="material-icons launchButton" onclick="launchMinecraft('${v.id}')">play_arrow</p>
-                    <div class="mods">
-                        <div class="mod">
-                            <h2>optifabric-1.11.20.jar</h2>
-                            <div style="text-align: center;" class="toggle_switch">
-                                <input type="checkbox" class="" id="sample_optifabric-1.11.20.jar" style="display: none;">
-                                <label class="check" for="sample_optifabric-1.11.20.jar"></label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-        </div>
-    </div>
     <div id="account" class="child def_text none_select">
         <h1>アカウント</h1>
         <div class="accounts">
-            <!-- <<div class="account">
-                <div class="info">
-                    <img src="https://crafatar.com/avatars/sample?size=100" alt="">
-                    <div>
-                        <p>username</p>
-                        <h1>sample</h1>
-                        <p>uuid</p>
-                        <h2>sample</h2>
-                    </div>
-                </div>
-                <div class="control">
-                    <div class="button white" onclick="selectUser('sample')">
-                        <p>選択</p>
-                    </div>
-                    <div class="button white" onclick="logoutUser('sample')">
-                        <p>ログアウト</p>
-                    </div>
-                </div>
-            </div> -->
         </div>
     </div>
     <p class="material-icons" id="mainBack" onclick="toggleMain('back')">navigate_before</p>

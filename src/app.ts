@@ -20,21 +20,19 @@ const appId = config.AppID
 const appSecret = config.AppSecret
 const redirectURL = config.redirect
 
-
-const sysRoot = process.env.APPDATA
-    || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME)
-    || (process.platform == 'linux' ? process.env.HOME + '/.sasalauncher2' : process.env.HOME)
-const datapath = process.env.DATAPATH || path.join(<string>sysRoot, '.sasalauncher2')
-if (!fs.existsSync(datapath))
-    fs.mkdirsSync(datapath)
-
 const distroLink = 'https://raw.githubusercontent.com/sasadd-LAB/SasaPacks2/master'
 
 process.on('uncaughtException',(err)=>{
     log.error(err);
 })
 
-class MainApp {
+export class MainApp {
+
+    public static readonly DATA_PATH = process.env.DATAPATH || path.join(
+        process.env.APPDATA
+        || (process.platform == 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME)
+        || (process.platform == 'linux' ? process.env.HOME + '/.sasalauncher2' : process.env.HOME) as string, '.sasalauncher2')
+
     private ejse = require('ejs-electron')
     private mainURL: string = `file:/${appPath}/app.ejs`
 
@@ -44,6 +42,9 @@ class MainApp {
     private ipcMain: IpcMain
 
     constructor(application: App) {
+        if (!fs.existsSync(MainApp.DATA_PATH))
+            fs.mkdirSync(MainApp.DATA_PATH)
+
         this.app = application
         this.autoUpdater = autoUpdater
         this.autoUpdater.autoDownload = false
@@ -82,11 +83,11 @@ class MainApp {
         })
 
         this.ipcMain.handle('getAccounts',()=>{
-            return fs.readJSONSync(path.join(datapath,"accounts.json")) || []
+            return fs.readJSONSync(path.join(MainApp.DATA_PATH,"accounts.json")) || []
         })
 
         this.ipcMain.handle('getDistribution',()=>{
-            return fs.readJSONSync(path.join(datapath,"distribution.json"))
+            return fs.readJSONSync(path.join(MainApp.DATA_PATH,"distribution.json"))
         })
 
         this.ipcMain.handle('getAuthConfig',()=>{
@@ -98,7 +99,7 @@ class MainApp {
         })
 
         this.ipcMain.handle('getDataPath',()=>{
-            return datapath
+            return MainApp.DATA_PATH
         })
 
         this.ipcMain.handle('getDistroLink',()=>{
@@ -168,7 +169,7 @@ class MainApp {
     private create() {
         this.mainWindow = new BrowserWindow({
             width: 1280,
-            height: 720,
+            height: 800,
             minWidth: 960,
             minHeight: 720,
             frame: false,
@@ -189,8 +190,6 @@ class MainApp {
         this.mainWindow.on('closed', () => {
             this.mainWindow = null
         })
-
-        //this.mainWindow.removeMenu()
     }
 
     private async onReady() {

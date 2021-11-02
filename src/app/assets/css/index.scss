@@ -576,6 +576,19 @@ html {
     }
 }
 
+#middleHeader{
+    text-align: center;
+    .menus{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        p {
+            font-size: 0.8rem;
+            color: #325239;
+        }
+    }
+}
+
 #mainNext,
 #mainBack {
     position: absolute;
@@ -627,6 +640,25 @@ html {
         border-radius: 17px;
         background: #ffffff;
         box-shadow: -15px 15px 30px #c9c9c9, 15px -15px 30px #ffffff;
+    }
+}
+
+/* debugLog */
+#debugLog{
+    text-align: center;
+    .log{
+        display: inline-block;
+        text-align: left;
+        margin: 0;
+        overflow-y: scroll;
+        width: 70%;
+        height: 80%;
+        p{
+            user-select: text;
+            font-size: 0.6rem;
+            margin: 0;
+            margin-bottom: 5px;
+        }
     }
 }
 
@@ -689,7 +721,7 @@ html {
         .server {
             display: inline-block;
             margin: 10px;
-            width: 350px;
+            width: 45%;
             color: white;
             background-color: #4c7b57;
             border-radius: 5px;
@@ -718,6 +750,47 @@ html {
                         overflow: hidden;
                         text-overflow: ellipsis;
                         white-space: nowrap;
+                    }
+
+                    .buttons{
+                        display: flex;
+                        width: 20%;
+                        align-items: center;
+                        justify-content: space-between;
+                        .modDeleteButton{
+                            margin: 0;
+                            font-size: 2rem;
+                            &:hover {
+                                color: #325239;
+                            }
+                        }
+                    }
+                }
+            }
+            .addAdditionalMod {
+                width: 80% !important;
+                display: flex;
+                width: 100%;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 10px;
+                margin-left: 10px;
+
+                h2 {
+                    max-width: 80%;
+                    font-size: 0.9rem;
+                    margin: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                p {
+                    margin: 0;
+                    font-size: 2rem;
+                    transition: 0.25s;
+                    &:hover {
+                        color: #325239;
                     }
                 }
             }

@@ -5,6 +5,7 @@ import { Distribution, ServerOption } from "@assets/js/model/Distribution";
 import { ConfigurationManager } from "@assets/js/ConfigurationManager";
 import { Logger } from "@assets/js/Logger";
 import { DiscordRPC } from "@assets/js/DiscordRPC";
+import { DOMBuilder } from "@assets/js/scripts/DOMBuilder";
 
 import fs from "fs-extra"
 import path from "path"
@@ -22,6 +23,7 @@ const login: HTMLDivElement = document.getElementById('login') as HTMLDivElement
 const launch: HTMLDivElement = document.getElementById('launch') as HTMLDivElement
 const account: HTMLDivElement = document.getElementById('account') as HTMLDivElement
 const setting: HTMLDivElement = document.getElementById('setting') as HTMLDivElement
+const debugLog: HTMLDivElement = document.getElementById('debugLog') as HTMLDivElement
 
 const mainChildren: Element[] = Array.from(main.getElementsByClassName('current'))
 let currentChild: number = 0
@@ -29,6 +31,7 @@ let currentChild: number = 0
 let toggleMain_lock: boolean = false
 
 const overlay = new Overlay(document.getElementById("overlay") as HTMLDivElement, document.getElementById("app") as HTMLDivElement)
+const domBuilder = new DOMBuilder()
 
 async function initDom() {
     const accountsData: Array<any> = await ipcRenderer.invoke('getAccounts')
@@ -38,7 +41,7 @@ async function initDom() {
         currentChild = 2
     } else {
         landing = 'login'
-        currentChild = 1
+        currentChild = 3
     }
     const others = Array.from(main.getElementsByClassName('child')).filter(v => v.id !== landing)
     for (let v of others) {
@@ -89,83 +92,20 @@ async function updateServers() {
     const distribution = await ipcRenderer.invoke('getDistribution')
     const configs: ServerOption[] = distribution.servers
     const servers: HTMLDivElement = launch.getElementsByClassName('servers')[0] as HTMLDivElement
-    const config = ConfigurationManager.getConfig()
     servers.innerHTML = ''
     for (const v of configs) {
-        const server = document.createElement('div')
-        let modsHTML = '<p style="color:#325239; margin:0; margin-left:5px;">MOD</p>'
-        for (const m of v.mods) {
-            const html =
-                `<div class="mod">
-                <h2>${m.name}</h2>
-                <div style="text-align: center;" class="toggle_switch">
-                    <input type="checkbox" name="${m.name}" id="${v.id}_${m.name}" style="display: none;">
-                    <label class="check" for="${v.id}_${m.name}"></label>
-                </div>
-            </div>`
-            modsHTML += html
-        }
-        let additional_mods = '<p style="color:#325239; margin:0; margin-left:5px;">Additional Mods</p>'
-        if (fs.existsSync(path.join(config.MinecraftDataFolder, 'servers', v.id, 'mods'))) {
-            for (const m of fs.readdirSync(path.join(config.MinecraftDataFolder, 'servers', v.id, 'mods'))) {
-                const name = m.replace('.disabled', '')
-                if (v.mods.filter(v2 => v2.name === name).length !== 0)
-                    continue
-                const html =
-                    `<div class="mod">
-                    <h2>${name}</h2>
-                    <div style="text-align: center;" class="toggle_switch">
-                        <input type="checkbox" name="${name}" id="${v.id}_${name}" style="display: none;">
-                        <label class="check" for="${v.id}_${name}"></label>
-                    </div>
-                </div>`
-                additional_mods += html
-            }
-        }
-        server.innerHTML =
-            `<div class="wrapper ${v.id}">
-                <div class="info">
-                    <h1 class="title">${v.name}</h1>
-                    <p class="version">${v.option.version.number}</p>
-                    <p class="description">${v.description}</p>
-                </div>
-                <p class="material-icons launchButton" onclick="launchMinecraft('${v.id}')">play_circle_filled</p>
-                <div class="mods">
-                    ${modsHTML}
-                </div>
-                <div class="mods">
-                    ${additional_mods}
-                </div>
-            </div>`
-        server.classList.add('server')
-        servers.appendChild(server)
+        servers.appendChild(domBuilder.buildServer(v))
     }
 }
 
 async function updateAccounts() {
-    const accountsData = await ipcRenderer.invoke('getAccounts')
+    const accountsData:Account[] = await ipcRenderer.invoke('getAccounts')
 
     const accounts = account.getElementsByClassName('accounts')[0]
     accounts.innerHTML = ''
 
     for (const v of accountsData) {
-        const acco = document.createElement('div')
-        acco.innerHTML =
-            `<div class="info">
-                <img src="https://mcskin.sasadd.net/uuid/face/${v.uuid}?size=100" alt="">
-                <div>
-                    <p>username</p>
-                    <h1>${v.username}</h1>
-                    <p>uuid</p>
-                    <h2>${v.uuid}</h2>
-                </div>
-            </div>
-            <div class="control">
-                <div class="button white" onclick="selectUser('${v.uuid}')"><p>選択</p></div>
-                <div class="button white" onclick="logoutUser('${v.uuid}')"><p>ログアウト</p></div>
-            </div>`
-        acco.classList.add('account')
-
+        const acco = domBuilder.buildAccount(v)
         accounts.appendChild(acco)
         if (v.selected === true) {
             const accountEl = header.getElementsByClassName('account')[0]
@@ -255,22 +195,11 @@ const launcher = new Launcher()
 
 async function init() {
     DATA_PATH = await ipcRenderer.invoke('getDataPath')
-    Logger.setPath(path.join(DATA_PATH, 'logs'))
+    Logger.setup(path.join(DATA_PATH, 'logs'), debugLog.getElementsByClassName('log')[0] as HTMLDivElement)
     await ConfigurationManager.init()
     const config = ConfigurationManager.getConfig()
 
-    //process
-    process.on('uncaughtException', (error) => {
-        console.log(error.name)
-        overlay.Error('U:000', error.message)
-    })
-    process.on('unhandledRejection', (reason) => {
-        console.log(reason)
-    })
-    process.on('uncaughtExceptionMonitor', (error, origin) => {
-        console.log(error, origin)
-    })
-
+    Logger.info('Initializing...')
     const dataFolder: HTMLInputElement = setting.getElementsByClassName('dataFolder')[0] as HTMLInputElement
     const java16: HTMLInputElement = setting.getElementsByClassName('java16')[0] as HTMLInputElement
     const java8: HTMLInputElement = setting.getElementsByClassName('java8')[0] as HTMLInputElement
@@ -296,14 +225,16 @@ async function init() {
         fs.writeJSONSync(accountsPath, [])
     }
 
-    const mcdatapath = path.join(DATA_PATH, ".minecraft")
-    if (!fs.existsSync(mcdatapath)) {
-        fs.mkdirsSync(mcdatapath)
+    const MC_DATA_PATH = path.join(DATA_PATH, ".minecraft")
+    if (!fs.existsSync(MC_DATA_PATH)) {
+        fs.mkdirsSync(MC_DATA_PATH)
     }
 
 
     const response = await axios.get(`${packUrl}/distribution.json`)
     fs.writeJSONSync(path.join(DATA_PATH, "distribution.json"), response.data, { spaces: 4 })
+
+    launcher.initLauncherProfile()
 
     await initDom()
 
@@ -427,7 +358,7 @@ async function selectUser(uuid: string) {
     const usericon: HTMLImageElement = accountEl.getElementsByClassName('usericon')[0] as HTMLImageElement
 
     username.innerHTML = account.username
-    usericon.src = `https://mcskin.sasadd.net/uuid/face/${account.uuid}?size=100`
+    usericon.src = `https://mcskin.sasadd.net/uuid/face/${account.uuid}?size=50`
 
     const others = accounts.filter(v => v.uuid !== uuid)
     for (const v of others) {
@@ -482,21 +413,20 @@ async function launchMinecraft(id: string) {
         }
     }
 
-    console.log(disableModList)
-
     await overlay.showProgress()
     try {
-        const client = await launcher.launch(currentAccount, id, disableModList)
+        const client = await launcher.createClient(currentAccount, id, disableModList)
+        client.launchS()
         overlay.setProgress("loading", 0, 100)
-        client.on('progress', (data) => {
-            overlay.setProgress(`Downloading: ${data.type} ...`, data.task, data.total)
+        client.on('task', (data)=>{
+            overlay.setProgress(`${data.name}`, data.task, data.total)
         })
+
         client.on('data', async data => {
             if (overlay.showing())
                 overlay.close()
-
-            const msg = <string>data
-            console.log(msg)
+            const msg = data as string
+            Logger.info(msg)
             if (msg.includes('Loading for game')) {
                 DiscordRPC.setActivity({
                     details: `${client.getServerOption().name} を起動中...`,
@@ -534,8 +464,18 @@ async function launchMinecraft(id: string) {
                 await DiscordRPC.setDefault()
             }
         })
+        client.on('error', (err) => {
+            overlay.Error('A:006', err)
+        })
         client.on('close', async data => {
+            if(data === 1) {
+                overlay.Error('A:000', 'クライアントが起動できませんでした。')
+            }
+            Logger.debug(`Exit code : ${data}`)
             await DiscordRPC.setDefault()
+        })
+        client.on("debug", (data) => {
+            Logger.debug(data)
         })
     } catch (error) {
         const Lerorr = <LauncherError>error
@@ -544,6 +484,36 @@ async function launchMinecraft(id: string) {
     }
 }
 
+async function addAdditionalMod(id: string) {
+    const file = dialog.showOpenDialogSync({
+        title: '追加するModを選択',
+        properties: ['openFile'],
+        filters: [
+            { name: 'Mod', extensions: ['jar'] }
+        ]
+    })
+    if (file) {
+        const modPath = file[0]
+        const modName = path.basename(modPath)
+        const mod = document.createElement('div')
+        mod.className = 'mod'
+        mod.innerHTML = domBuilder.buildAdditionalMod(id, modName)
+        const modsDiv: HTMLDivElement = launch.getElementsByClassName(id)[0].getElementsByClassName('mods')[1] as HTMLDivElement
+        modsDiv.appendChild(mod)
+        launcher.addAdditionalMod(id, modPath)
+    }
+}
+async function removeAdditionalMod(id: string, modName: string){
+    const doc = document.createElement('h1')
+    doc.innerHTML = 'Modを削除しますか？'
+    const question = await overlay.question(doc)
+    if(question){
+        const modsDiv: HTMLDivElement = launch.getElementsByClassName(id)[0].getElementsByClassName('mods')[1] as HTMLDivElement
+        const mod = modsDiv.getElementsByClassName(`${id}_${modName}`)[0]
+        mod.remove()
+        launcher.removeAdditionalMod(id, modName)
+    }
+}
 
 /**
  * Configの保存
@@ -581,8 +551,6 @@ function saveConfiguration() {
     ConfigurationManager.save(config)
     toggleMain('back')
 }
-
-
 
 
 async function checkUpdate() {
@@ -643,7 +611,7 @@ ipcRenderer.on('autoUpdateNotification', async (event: IpcRendererEvent, arg: st
             break
         }
         case 'realerror': {
-            console.error(info)
+            Logger.error(info)
             break
         }
         default:

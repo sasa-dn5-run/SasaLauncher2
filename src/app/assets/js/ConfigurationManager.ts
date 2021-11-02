@@ -3,18 +3,18 @@ import fs from 'fs-extra'
 import path from 'path'
 import { Configuration } from './model/configuration'
 
-let datapath:string
+let DATA_PATH:string
 
 class ConfigurationManager{
     public static async init(){
-        datapath = await ipcRenderer.invoke('getDataPath')
+        DATA_PATH = await ipcRenderer.invoke('getDataPath')
 
-        const configFile = path.join(datapath, 'config.json')
+        const configFile = path.join(DATA_PATH, 'config.json')
         if (fs.existsSync(configFile))
             return
         
         const config: Configuration = {
-            MinecraftDataFolder: path.join(datapath,"servers"),
+            MinecraftDataFolder: path.join(DATA_PATH,"servers"),
             java16:'',
             java8:'',
             Xmx:'4G',
@@ -25,7 +25,7 @@ class ConfigurationManager{
     }
 
     public static getConfig():Configuration{
-        const configPath = path.join(datapath, 'config.json')
+        const configPath = path.join(DATA_PATH, 'config.json')
         const config:Configuration = <Configuration>fs.readJSONSync(configPath)
         if(typeof config === 'undefined')
             throw new Error()
@@ -33,7 +33,7 @@ class ConfigurationManager{
     }
 
     public static save(config:Configuration){
-        fs.writeJSONSync(path.join(datapath,'config.json'),config,{spaces:4})
+        fs.writeJSONSync(path.join(DATA_PATH,'config.json'),config,{spaces:4})
     }
 }
 

@@ -14,10 +14,10 @@ class Overlay{
         this.app = app
     }
 
-    async show(doc: HTMLElement,trueOrFalse?:Boolean){
+    public async show(doc: HTMLElement,trueOrFalse?:Boolean){
         this.app.style.filter = "blur(2.5px)"
         this.app.style.pointerEvents = "none"
-        await animate(this.app, {
+        await this.animate(this.app, {
             filter: [
                 "blur(0px)",
                 "blur(2.5px)"
@@ -56,16 +56,16 @@ class Overlay{
 
         this.overlay.style.opacity = "1"
         this.overlay.style.display = "block"
-        await animate(this.overlay, {
+        await this.animate(this.overlay, {
             opacity: [0, 1]
         }, 100)
         return
     }
 
-    async close(trueOrFalse?:Boolean,confirm?:Boolean){
+    public async close(trueOrFalse?:Boolean,confirm?:Boolean){
         this.app.style.filter = "blur(0px)"
         this.app.style.pointerEvents = "all"
-        await animate(this.app, {
+        await this.animate(this.app, {
             filter: [
                 "blur(2.5px)",
                 "blur(0px)"
@@ -74,7 +74,7 @@ class Overlay{
         const wrapper = <HTMLDivElement>this.overlay.getElementsByClassName("wrapper")[0]
 
         this.overlay.style.opacity = "0"
-        await animate(this.overlay, {
+        await this.animate(this.overlay, {
             opacity: [1, 0]
         }, 100)
         this.overlay.style.display = "none"
@@ -89,7 +89,7 @@ class Overlay{
         }
     }
 
-    change(doc: HTMLElement, trueOrFalse?: Boolean):void{
+    public change(doc: HTMLElement, trueOrFalse?: Boolean):void{
         const wrapper = <HTMLDivElement>this.overlay.getElementsByClassName("wrapper")[0]
         wrapper.innerHTML = ""
         wrapper.appendChild(doc)
@@ -119,10 +119,10 @@ class Overlay{
         }
     }
 
-    async loading() {
+    public async loading() {
         this.app.style.filter = "blur(2.5px)"
         this.app.style.pointerEvents = "none"
-        await animate(this.app, {
+        await this.animate(this.app, {
             filter: [
                 "blur(0px)",
                 "blur(2.5px)"
@@ -140,15 +140,15 @@ class Overlay{
 
         this.overlay.style.opacity = "1"
         this.overlay.style.display = "block"
-        await animate(this.overlay, {
+        await this.animate(this.overlay, {
             opacity: [0, 1]
         }, 100)
     }
 
-    async showProgress(){
+    public async showProgress(){
         this.app.style.filter = "blur(2.5px)"
         this.app.style.pointerEvents = "none"
-        await animate(this.app, {
+        await this.animate(this.app, {
             filter: [
                 "blur(0px)",
                 "blur(2.5px)"
@@ -168,12 +168,12 @@ class Overlay{
 
         this.overlay.style.opacity = "1"
         this.overlay.style.display = "block"
-        await animate(this.overlay, {
+        await this.animate(this.overlay, {
             opacity: [0, 1]
         }, 100)
     }
 
-    setProgress(titleText:string,value:number,max:number){
+    public setProgress(titleText:string,value:number,max:number){
         const wrapper: HTMLDivElement = <HTMLDivElement>this.overlay.getElementsByClassName('wrapper')[0]
         const progress:HTMLProgressElement =<HTMLProgressElement>wrapper.getElementsByTagName('progress')[0]
         const title:HTMLHeadElement = <HTMLHeadElement>wrapper.getElementsByTagName('h2')[0]
@@ -184,11 +184,11 @@ class Overlay{
         progress.max = max
     }
 
-    showing():Boolean{
+    public showing():Boolean{
         return this.overlay.style.display !== "none"
     }
 
-    Error(code:string,msg:string):void{
+    public Error(code:string,msg:string):void{
         let doc:HTMLElement = <HTMLElement>document.createElement('div')
         doc.innerHTML =
         `<h1>Error</h1>
@@ -197,7 +197,7 @@ class Overlay{
         this.show(doc)
     }
 
-    question(doc: HTMLElement): Promise<boolean>{
+    public question(doc: HTMLElement): Promise<boolean>{
         return new Promise(async(resolve,reject)=>{
             this.show(doc,true)
             this.on("close",(confirm:any)=>{
@@ -205,7 +205,7 @@ class Overlay{
             })
         })
     }
-    changeQuestion(doc:HTMLElement):Promise<Boolean>{
+    public changeQuestion(doc:HTMLElement):Promise<Boolean>{
         return new Promise((resolve,reject)=>{
             this.change(doc,true)
             this.on("close",(confirm:any)=>{
@@ -214,7 +214,7 @@ class Overlay{
         })
     }
 
-    on(name:"close",fun:any){
+    public on(name:"close",fun:any){
         let event:listener = {
             name:name,
             fun:fun
@@ -222,7 +222,7 @@ class Overlay{
         this.listeners.push(event)
     }
 
-    removeAllListeners():void{
+    public removeAllListeners():void{
         this.listeners = []
     }
 
@@ -231,5 +231,13 @@ class Overlay{
         for(let v of funs){
             v.fun(...args)
         }
+    }
+    private animate(doc: HTMLElement, css: Keyframe[] | PropertyIndexedKeyframes, duration: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            doc.animate(css, duration)
+            .onfinish = () => {
+                resolve()
+            }
+        })
     }
 }
