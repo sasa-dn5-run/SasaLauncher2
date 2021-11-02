@@ -156,9 +156,9 @@ class Builder {
             if (fs.lstatSync(file).isDirectory()) continue
             const destFile = path.resolve(file.replace(srcDir, dest))
 
-            process.stdout.clearLine(0)
-            process.stdout.cursorTo(0)
-            process.stdout.write(`Copying ${files.indexOf(file)}/${files.length} :${fileName}...`)
+            // process.stdout.clearLine(0)
+            // process.stdout.cursorTo(0)
+            // process.stdout.write(`Copying ${files.indexOf(file)}/${files.length} :${fileName}...`)
 
             if (fs.existsSync(destFile)) {
                 const destd5 = crypto.createHash('md5').update(fs.readFileSync(file)).digest('hex')
