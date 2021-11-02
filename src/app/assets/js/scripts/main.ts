@@ -473,6 +473,8 @@ async function launchMinecraft(id: string) {
             }
         })
         client.on('error', (err) => {
+            console.error(err)
+            Logger.error(err)
             overlay.Error('A:006', err)
         })
         client.on('close', async data => {

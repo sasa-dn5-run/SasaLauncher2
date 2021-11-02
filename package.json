@@ -24,8 +24,7 @@
         "minecraft-auth": "^1.0.29",
         "minecraft-launcher-core": "^3.16.8",
         "tar": "^6.1.11",
-        "unzipper": "^0.10.11",
-        "zlib": "^1.0.5"
+        "unzipper": "^0.10.11"
     },
     "devDependencies": {
         "@types/discord-rpc": "^4.0.0",

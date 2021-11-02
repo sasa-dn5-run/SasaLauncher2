@@ -2,11 +2,10 @@ import { spawnSync } from "child_process";
 import fs from 'fs-extra'
 import path from 'path'
 import https from 'https'
-import http from 'http'
 import unzip from 'unzipper'
-import zlib from 'zlib'
 import tar from 'tar'
 import { EventEmitter } from "events";
+
 class Java {
     public static readonly events = new EventEmitter()
     public static getVersion(javaPath: string): string {
@@ -25,12 +24,20 @@ class Java {
         const ext = process.platform === 'win32' ? 'java.exe' : 'java'
         const javaDir = path.join(DATA_PATH, "java")
         if (!fs.existsSync(javaDir)) {
-            await Java.installJava()
+            try {
+                await Java.installJava()
+            } catch (error) {
+                throw error
+            }
         }
         let javas = fs.readdirSync(javaDir).filter(f => f.match(/java|jdk|jre/))
         const javaVersion = version.match(/1.17|1.18|21w3|21w4/) ? "16" : undefined
         if(javas.length === 0){
-            await Java.installJava()
+            try {
+                await Java.installJava()
+            } catch (error) {
+                throw error
+            }
             javas = fs.readdirSync(javaDir).filter(f => f.match(/java|jdk|jre/))
         }
         if (javaVersion) {
@@ -99,8 +106,8 @@ class Java {
 
         const temp = path.join(DATA_PATH, 'java', `temp.${ext}`)
 
-        //ダウンロード
         try {
+            //ダウンロード
             await (new Promise((resolve, reject) => {
                 const file = fs.createWriteStream(temp)
                 https.get(url, (res) => {
@@ -133,32 +140,34 @@ class Java {
                     console.log(err)
                 })
             }) as Promise<void>)
+
+            //解凍
+            console.log(path.join(DATA_PATH, 'java') )
+            await (new Promise((resolve, reject) => {
+                const rs = fs.createReadStream(temp)
+                if (ext === 'zip') {
+                    rs.pipe(unzip.Extract({ path: path.join(DATA_PATH, 'java') }))
+                        .on('close', () => {
+                            resolve()
+                        })
+                        .on('error', () => {
+                            reject()
+                        })
+                } else {
+                    rs.pipe(tar.x({ cwd: path.join(DATA_PATH, 'java') }))
+                        .on('close', () => {
+                            resolve()
+                        })
+                        .on('error', () => {
+                            reject()
+                        })
+                }
+            }) as Promise<void>)
         } catch (error) {
+            console.log(error)
             throw error
         }
 
-        //解凍
-        await (new Promise((resolve, reject) => {
-            const rs = fs.createReadStream(temp)
-            if (ext === 'zip') {
-                rs.pipe(unzip.Extract({ path: path.join(DATA_PATH, 'java') }))
-                    .on('close', () => {
-                        resolve()
-                    })
-                    .on('error', () => {
-                        reject()
-                    })
-            } else {
-                rs.pipe(zlib.createGunzip())
-                    .pipe(tar.Extract({ path: path.join(DATA_PATH, 'java') }))
-                    .on('close', () => {
-                        resolve()
-                    })
-                    .on('error', () => {
-                        reject()
-                    })
-            }
-        }) as Promise<void>)
 
         fs.removeSync(temp)
     }
