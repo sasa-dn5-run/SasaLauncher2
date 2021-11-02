@@ -85,7 +85,7 @@ class Builder {
             config: {
                 appId: pkg.name,
                 productName: pkg.name,
-                artifactName: '${productName}-setup.${ext}',
+                artifactName: '${productName}-setup-${version}.${ext}',
                 copyright: 'Copyright © 2021 ddPn08',
                 directories: {
                     buildResources: './build',
