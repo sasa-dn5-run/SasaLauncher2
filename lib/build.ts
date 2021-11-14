@@ -4,14 +4,13 @@ import glob from "glob"
 import sass from "sass"
 import crypto from "crypto"
 import replace from "replace-in-file"
-import { Arch, build, CliOptions, Platform } from "electron-builder"
+import { build, CliOptions } from "electron-builder"
 import { execSync } from "child_process"
 const pkg = fs.readJSONSync(path.join(__dirname, "..", "package.json"))
 
 class Builder {
 
     private readonly version: string = !!process.env.VERSION && (process.env.VERSION as string).split(".").length === 3 ? (process.env.VERSION as string) : "0.0.0"
-    private readonly platform: string = (process.argv.length > 3 && !process.argv[3].startsWith("--")) ? process.argv[3] : process.platform
 
     private readonly extraOptions: string[] = []
 
@@ -131,19 +130,6 @@ class Builder {
             await build((<unknown>config) as CliOptions)
         } catch (error) {
             throw error
-        }
-    }
-    private getCurrentPlatform(): Platform {
-        console.log(this.platform)
-        switch (this.platform) {
-            case "win32":
-                return Platform.WINDOWS
-            case "darwin":
-                return Platform.MAC
-            case "linux":
-                return Platform.LINUX
-            default:
-                throw new Error("Unsupported platform")
         }
     }
     private copyFiles(src: string, dest: string, exclude: string[]) {
