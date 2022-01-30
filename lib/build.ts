@@ -43,7 +43,7 @@ class Builder {
             execSync(`gpg --quiet --batch --yes --decrypt --passphrase=${process.env.GPGPASS} --output src/config.json secret.json.gpg`)
         }
         
-        process.stdout.write("Compiling...\n")
+        console.log("Compiling...")
         execSync(path.resolve("node_modules/.bin/tsc"))
         for (const v of glob.sync("./src/**/*")) {
             if (!v.endsWith(".scss")) continue
@@ -52,7 +52,7 @@ class Builder {
             fs.writeFileSync(dest, sass.renderSync({ file: v }).css.toString())
         }
 
-        process.stdout.write("Rewriting paths...\n")
+        console.log("Rewriting paths...")
         replace.replaceInFileSync({
             files: "./dist/app/**/*",
             from: /@assets/g,
@@ -63,12 +63,12 @@ class Builder {
             from: /@modules/g,
             to: '../../modules',
         })
-        process.stdout.write("Copying files...\n")
+        console.log("Copying files...")
         this.copyFiles("./src/**/*", "./dist", [".ts", ".scss"])
         fs.copyFileSync('./package.json','./dist/package.json')
     }
     public rewriteVersion() {
-        process.stdout.write(`Rewriting version... ${this.version}\n`)
+        console.log(`Rewriting version... ${this.version}`)
         const version = this.version
         const json = fs.readJSONSync('./package.json')
         json.version = version
@@ -79,7 +79,7 @@ class Builder {
             fs.removeSync('./product')
         
         this.compile()
-        process.stdout.write("Building...\n")
+        console.log("Building...")
         const config:CliOptions = {
             config: {
                 appId: pkg.name,
@@ -142,10 +142,6 @@ class Builder {
             if (fs.lstatSync(file).isDirectory()) continue
             const destFile = path.resolve(file.replace(srcDir, dest))
 
-            // process.stdout.clearLine(0)
-            // process.stdout.cursorTo(0)
-            // process.stdout.write(`Copying ${files.indexOf(file)}/${files.length} :${fileName}...`)
-
             if (fs.existsSync(destFile)) {
                 const destd5 = crypto.createHash('md5').update(fs.readFileSync(file)).digest('hex')
                 const srcd5 = crypto.createHash('md5').update(fs.readFileSync(destFile)).digest('hex')
@@ -155,12 +151,9 @@ class Builder {
                 fs.mkdirsSync(path.resolve(dest, fileName, ".."))
             }
             copied++
-            // process.stdout.clearLine(0)
-            // process.stdout.cursorTo(0)
-            // process.stdout.write(`Copying ${files.indexOf(file)}/${files.length} :${fileName}...`)
             fs.copySync(file, destFile)
         }
-        process.stdout.write(`\nCopied ${copied} files.\n`)
+        console.log(`Copied ${copied} files`)
     }
 }
 Builder.Main()

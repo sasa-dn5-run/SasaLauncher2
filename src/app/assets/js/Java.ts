@@ -19,7 +19,7 @@ class Java {
         else throw new JavaError('DetectJavaVersionException', 'J:001', 'Javaのバージョンを検出できませんでした。')
     }
 
-    public static async getJava(version: string) {
+    public static async getJava() {
         const DATA_PATH = await ipcRenderer.invoke('getDataPath')
         const ext = process.platform === 'win32' ? 'java.exe' : 'java'
         const javaDir = path.join(DATA_PATH, "java")
@@ -31,7 +31,7 @@ class Java {
             }
         }
         let javas = fs.readdirSync(javaDir).filter(f => f.match(/java|jdk|jre/))
-        const javaVersion = version.match(/1.17|1.18|21w3|21w4/) ? "16" : undefined
+        let java = javas.find(f => f.match(new RegExp('jdk-17')))
         if(javas.length === 0){
             try {
                 await Java.installJava()
@@ -40,16 +40,23 @@ class Java {
             }
             javas = fs.readdirSync(javaDir).filter(f => f.match(/java|jdk|jre/))
         }
-        if (javaVersion) {
-            const java = javas.find(j => j.includes(javaVersion))
-            if (java) {
-                return path.join(javaDir, java, 'bin', ext)
-            } else {
-                throw new JavaError('InstallJavaException', 'J:002', 'Javaのインストールに失敗しました。')
+        if (!java){
+            try {
+                await Java.installJava()
+            } catch (error) {
+                throw error
             }
+            javas = fs.readdirSync(javaDir).filter(f => f.match(/java|jdk|jre/))
         }
+        java = javas.find(f => f.match(new RegExp('jdk-17')))
+        if(!java){
+            throw new JavaError('JavaNotFoundException', 'J:002', 'Javaが見つかりませんでした。')
+        }
+        return this.getJavaBin(path.join(javaDir, java))
+    }
 
-        return process.platform === 'darwin' ? path.join(javaDir, javas[0], 'Contents', 'Home', 'bin', ext) : path.join(javaDir, javas[0], 'bin', ext)
+    private static getJavaBin(dir: string){
+        return process.platform === 'darwin' ? path.join(dir, 'Contents', 'Home', 'bin', 'java') : path.join(dir, 'bin', 'java')
     }
 
     private static async installJava() {
@@ -63,7 +70,7 @@ class Java {
                 switch (process.arch) {
                     case 'x64':
                     case 'arm64':
-                        url = 'https://download.java.net/java/GA/jdk16.0.1/7147401fd7354114ac51ef3e1328291f/9/GPL/openjdk-16.0.1_windows-x64_bin.zip'
+                        url = 'https://download.java.net/java/GA/jdk17.0.1/2a2082e5a09d4267845be086888add4f/12/GPL/openjdk-17.0.1_windows-x64_bin.zip'
                         ext = 'zip'
                         break
                     default:
@@ -73,7 +80,7 @@ class Java {
             case 'darwin':
                 switch (process.arch) {
                     case 'x64':
-                        url = 'https://download.java.net/java/GA/jdk16.0.1/7147401fd7354114ac51ef3e1328291f/9/GPL/openjdk-16.0.1_osx-x64_bin.tar.gz'
+                        url = 'https://download.java.net/java/GA/jdk17.0.1/2a2082e5a09d4267845be086888add4f/12/GPL/openjdk-17.0.1_macos-x64_bin.tar.gz'
                         ext = 'tar.gz'
                         break
                     default:
@@ -83,12 +90,9 @@ class Java {
             case 'linux':
                 switch (process.arch) {
                     case 'x64':
-                        url = 'https://download.java.net/java/GA/jdk16.0.1/7147401fd7354114ac51ef3e1328291f/9/GPL/openjdk-16.0.1_linux-x64_bin.tar.gz'
+                        url = 'https://download.java.net/java/GA/jdk17.0.1/2a2082e5a09d4267845be086888add4f/12/GPL/openjdk-17.0.1_linux-x64_bin.tar.gz'
                         ext = 'tar.gz'
                         break
-                    case 'arm64':
-                        url = 'https://download.java.net/java/GA/jdk16.0.1/7147401fd7354114ac51ef3e1328291f/9/GPL/openjdk-16.0.1_linux-aarch64_bin.tar.gz'
-                        ext = 'tar.gz'
                     default:
                         throw new JavaError('InstallJavaException', 'J:002', 'Javaのインストールに失敗しました。')
                 }
@@ -112,7 +116,7 @@ class Java {
                     res.on('data', (chunk) => {
                         file.write(chunk)
                         Java.events.emit('download', {
-                            type: "Java16",
+                            type: "Java17",
                             total: length,
                             task: file.bytesWritten
                         })

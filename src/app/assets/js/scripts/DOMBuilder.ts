@@ -65,7 +65,7 @@ export class DOMBuilder {
             return `<div class="mod ${id}_${name}">
                 <h2>${name}</h2>
                 <div style="text-align: center;" class="toggle_switch">
-                    <input type="checkbox" name="${name}" id="${id}_${name}" style="display: none;">
+                    <input type="checkbox" checked checked name="${name}" id="${id}_${name}" style="display: none;">
                     <label class="check" for="${id}_${name}"></label>
                 </div>
             </div>`
@@ -107,7 +107,7 @@ export class DOMBuilder {
                 <div class="buttons">
                     <p class="material-icons modDeleteButton" onclick="removeAdditionalMod('${id}', '${name}')">delete</p>
                     <div style="text-align: center;" class="toggle_switch">
-                        <input type="checkbox" name="${name}" id="${id}_${name}" style="display: none;">
+                        <input type="checkbox" checked name="${name}" id="${id}_${name}" style="display: none;">
                         <label class="check" for="${id}_${name}"></label>
                     </div>
                 </div>

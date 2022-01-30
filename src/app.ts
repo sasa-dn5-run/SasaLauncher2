@@ -1,4 +1,3 @@
-
 import { app, App, AutoUpdater, BrowserWindow, IpcMain, ipcMain, IpcMainEvent, IpcMainInvokeEvent, Menu, Session, Tray } from 'electron'
 import { autoUpdater, AppUpdater } from 'electron-updater'
 
@@ -8,12 +7,11 @@ import fs from 'fs-extra'
 import { URL } from 'url'
 
 import { MicrosoftAuth } from 'minecraft-auth'
-import {} from 'minecraft-launcher-core'
 
 const appPath = path.join(__dirname, 'app')
-const isDev = fs.existsSync('../dev/isDev.js')
+const isDev = fs.existsSync('./dev/isDev.js')
 
-const config = require('./config.json') 
+const config = require(path.join(__dirname, 'config.json')) 
 
 const appId = config.AppID
 const appSecret = config.AppSecret

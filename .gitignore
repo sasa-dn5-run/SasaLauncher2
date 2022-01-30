@@ -1,10 +1,19 @@
+# yarn pkg
+/.pnp.*
+/.yarn/*
+!/.yarn/patches
+!/.yarn/plugins
+!/.yarn/releases
+!/.yarn/sdks
+!/.yarn/versions
+
 /node_modules
+/dev
 /dist
 /product
-/
+
 /*.log
 /*.code-workspace
-/
-/dev/
+
 /src/config.json
 /.github/workflows/debug.yml

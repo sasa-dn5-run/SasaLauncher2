@@ -1,13 +1,13 @@
 {
     "name": "SasaLauncher2",
     "version": "0.0.0",
-    "main": "app.js",
+    "main": "dist/app.js",
     "author": "ddPn08",
     "description": "笹だサーバーに入るためのマインクラフトランチャー。",
     "license": "MIT",
     "scripts": {
         "compile": "ts-node lib/build.ts compile",
-        "start": "yarn compile && cd dist && electron .",
+        "start": "yarn compile && electron .",
         "build": "ts-node lib/build.ts build",
         "build:win": "yarn build win32",
         "build:mac": "yarn build darwin",

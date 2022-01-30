@@ -139,8 +139,6 @@ export class Launcher{
     }
 
     private async saveMods(mods:Mod[]){
-        const config = ConfigurationManager.getConfig()
-
         for (const v of mods) {
             const filePath = await this.pathResolve(v.path)
             const fileDir = path.join(await this.pathResolve(v.path), '..') 

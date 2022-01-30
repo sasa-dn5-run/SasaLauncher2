@@ -39,7 +39,7 @@ export class SasaClient extends Client {
 
     public async launchS(){
         try {
-            this.option.option.javaPath = await Java.getJava(this.option.option.version.number)
+            this.option.option.javaPath = await Java.getJava()
             if(this.option.forgeLib){
                 await this.extractForge()
             }
